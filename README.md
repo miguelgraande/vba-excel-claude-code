@@ -5,7 +5,7 @@ Si eres una IA o vas a usarlo: lee [AGENTS.md](AGENTS.md) (orden de lectura) y
 
 Claude Code escribe código VBA como texto, lo mete en un libro de Excel, lo ejecuta y recibe el
 resultado en la terminal, sin copiar y pegar. El resultado se valida contra una referencia
-independiente en Python. Nace de un problema planteado por una profesora de VBA: se decía que una IA
+independiente en Python. Nace de un problema planteado por una profesora de Estadística (y matemática): se decía que una IA
 no puede ejecutar VBA porque vive dentro de Excel y, sobre todo, no había forma de **validar** las
 correcciones que propone. Problema y vías propuestas: [docs/01-contexto.md](docs/01-contexto.md).
 
