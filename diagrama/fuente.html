@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VBA en Excel para Mac desde Claude Code</title>
+<style>
+/* engineered-paper theme (stack-diagram v0.3.0). Colores y fuentes solo por tokens. */
+:root {
+  color-scheme: light;
+  --color-paper:   oklch(98.5% 0.004 250);
+  --color-paper-2: oklch(96.5% 0.005 252);
+  --color-rule:    oklch(93% 0.007 255);
+  --color-rule-2:  oklch(83% 0.011 255);
+  --color-muted:   oklch(56% 0.013 255);
+  --color-neutral: oklch(46% 0.015 255);
+  --color-ink-2:   oklch(34% 0.018 257);
+  --color-ink:     oklch(24% 0.020 258);
+  --color-accent:  oklch(58% 0.20 256);
+  --color-graphite:oklch(24% 0.018 260);
+  /* grupo A, cálido: capa de protecciones */
+  --color-g1:      oklch(68% 0.15 55);
+  --color-g1-soft: oklch(78% 0.12 55);
+  --color-g1-ink:  oklch(52% 0.14 50);
+  --color-g1-tint: oklch(96.5% 0.015 60 / .5);
+  /* grupo C, verde: Excel */
+  --color-g2:      oklch(58% 0.12 150);
+  --color-g2-soft: oklch(72% 0.09 150);
+  --color-g2-ink:  oklch(45% 0.11 150);
+  --color-g2-tint: oklch(96.5% 0.018 150 / .5);
+  --color-accent-soft: oklch(58% 0.20 256 / .45);
+  --color-accent-tint: oklch(97% 0.012 256 / .5);
+  --font-display: "Geist", "Hiragino Sans", "Yu Gothic UI", "Noto Sans CJK JP", "Noto Sans JP", ui-sans-serif, system-ui, sans-serif;
+  --font-body: "Hiragino Sans", "Yu Gothic UI", "Noto Sans CJK JP", "Noto Sans JP", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
+  --space-xs: 4px; --space-sm: 8px; --space-md: 16px; --space-lg: 24px; --space-xl: 40px; --space-2xl: 64px;
+  --radius-card: 10px; --radius-tile: 12px;
+  --color-veil: oklch(98.5% 0.004 250 / .78);
+}
+[data-theme="dark"] {
+  color-scheme: dark;
+  --color-paper:   oklch(18% 0.012 255);
+  --color-paper-2: oklch(22% 0.014 255);
+  --color-rule:    oklch(24% 0.013 255);
+  --color-rule-2:  oklch(38% 0.018 255);
+  --color-muted:   oklch(65% 0.014 255);
+  --color-neutral: oklch(72% 0.012 255);
+  --color-ink-2:   oklch(85% 0.010 255);
+  --color-ink:     oklch(94% 0.008 255);
+  --color-accent:  oklch(70% 0.16 256);
+  --color-graphite:oklch(31% 0.020 260);
+  --color-g1:      oklch(70% 0.14 55);
+  --color-g1-soft: oklch(58% 0.11 55);
+  --color-g1-ink:  oklch(78% 0.12 55);
+  --color-g1-tint: oklch(26% 0.030 60 / .40);
+  --color-g2:      oklch(66% 0.11 150);
+  --color-g2-soft: oklch(52% 0.08 150);
+  --color-g2-ink:  oklch(78% 0.10 150);
+  --color-g2-tint: oklch(25% 0.030 150 / .40);
+  --color-accent-soft: oklch(70% 0.16 256 / .5);
+  --color-accent-tint: oklch(28% 0.045 256 / .35);
+  --color-veil: oklch(18% 0.012 255 / .78);
+}
+@font-face { font-family:"Geist"; font-style:normal; font-weight:100 900; font-display:swap;
+  src:url(data:font/woff2;base64,%%FONT_DISPLAY%%) format("woff2"); }
+@font-face { font-family:"JetBrains Mono"; font-style:normal; font-weight:100 800; font-display:swap;
+  src:url(data:font/woff2;base64,%%FONT_JBM%%) format("woff2"); }
+.kicker, .node .role, .el, .legend, .foot, .pill i, .nota .mono { letter-spacing: 0.04em; }
+* { margin:0; padding:0; box-sizing:border-box; }
+html, body { overflow-x: clip; }
+body { background: var(--color-paper); color: var(--color-ink); font-family: var(--font-body); padding: var(--space-xl) var(--space-lg) var(--space-2xl); }
+.page { width: fit-content; max-width: 100%; margin: 0 auto; }
+
+.head { display:grid; grid-template-columns: 1fr auto; gap: var(--space-lg); align-items:end;
+  padding-bottom: var(--space-md); border-bottom: 1px solid var(--color-rule-2); margin-bottom: var(--space-lg); }
+.kicker { font-family: var(--font-mono); font-size: 11px; color: var(--color-accent); margin-bottom: var(--space-sm); }
+h1 { font-family: var(--font-display); font-weight: 700; font-size: clamp(22px, 4vw, 30px); letter-spacing: -0.005em; line-height: 1.2; }
+.lede { max-width: 340px; font-size: 12px; line-height: 1.7; color: var(--color-neutral); padding-bottom: 2px; }
+@media (max-width: 680px) { .head { grid-template-columns: 1fr; align-items:start; } .lede { max-width:none; } }
+
+.scroller { overflow-x: auto; border: 1px solid var(--color-rule-2); border-radius: var(--radius-card); }
+.canvas { position: relative; width: 1110px; height: 1240px; background: var(--color-paper);
+  background-image:
+    linear-gradient(var(--color-rule) 1px, transparent 1px),
+    linear-gradient(90deg, var(--color-rule) 1px, transparent 1px);
+  background-size: 24px 24px; background-position: -1px -1px; }
+
+.group { position:absolute; border-radius: var(--radius-tile); }
+.g-label { position:absolute; top:12px; left:12px; display:flex; align-items:center; gap:6px;
+  font-family: var(--font-display); font-size: 12px; font-weight: 600;
+  color: var(--color-neutral); white-space: nowrap; }
+.g-label img { width: 14px; height: 14px; }
+.g-label img.dk, .tile img.dk { display:none; }
+[data-theme="dark"] .g-label img.lt, [data-theme="dark"] .tile img.lt { display:none; }
+[data-theme="dark"] .g-label img.dk, [data-theme="dark"] .tile img.dk { display:block; }
+[data-theme="dark"] .g-label img.plate { background:#fff; border-radius:3px; padding:2px; width:18px; height:18px; }
+.group.ga { border:1.5px solid var(--color-g1); background: var(--color-g1-tint); }
+.group.gb { border:1.5px solid var(--color-accent-soft); background: var(--color-accent-tint); }
+.group.gc { border:1.5px solid var(--color-g2); background: var(--color-g2-tint); }
+.group.gc-nested { border:1.5px dashed var(--color-g2-soft); }
+.group.gn { border:1.5px dashed var(--color-rule-2); }
+.group.ga > .g-label { color: var(--color-g1-ink); }
+.group.gb > .g-label { color: var(--color-accent); }
+.group.gc > .g-label, .group.gc-nested > .g-label { color: var(--color-g2-ink); }
+
+.node { position:absolute; width:132px; text-align:center; }
+.tile { width:60px; height:60px; margin:0 auto; border-radius: var(--radius-tile);
+  background:#fff; border:1px solid var(--color-rule-2); display:grid; place-items:center;
+  box-shadow: 0 1px 2px oklch(24% 0.02 258 / 0.05); transition: border-color .15s cubic-bezier(0.16,1,0.3,1); }
+.node:hover .tile { border-color: var(--color-accent); }
+.tile img { width:34px; height:34px; object-fit:contain; }
+.node .name { font-family: var(--font-display); font-weight:600; font-size:13px; margin-top: var(--space-sm); letter-spacing:0; }
+.node .role { font-family: var(--font-mono); font-size:9.5px; color: var(--color-muted); margin-top:2px; line-height:1.45; }
+.node .name span, .node .role span { background: var(--color-veil); backdrop-filter: blur(1.5px);
+  padding: 0 var(--space-xs); border-radius: 3px; -webkit-box-decoration-break: clone; box-decoration-break: clone; }
+
+/* protecciones: pastillas dentro de la capa */
+.pill { position:absolute; height:48px; display:flex; align-items:center; gap:8px; padding:0 10px;
+  background: var(--color-paper); border:1px solid var(--color-g1-soft); border-radius: 8px; }
+.pill img { width:24px; height:24px; padding:3px; background:#fff; border:1px solid var(--color-rule-2); border-radius:6px; flex:none; }
+.pill b { display:block; font-family: var(--font-display); font-size:12px; font-weight:600; color: var(--color-ink); white-space:nowrap; }
+.pill i { display:block; font-style:normal; font-family: var(--font-mono); font-size:9.5px; color: var(--color-muted); white-space:nowrap; margin-top:1px; }
+
+/* notas dentro del lienzo */
+.nota { position:absolute; background: var(--color-paper-2); border:1px solid var(--color-rule-2);
+  border-radius: var(--radius-card); padding: 14px 16px; }
+.nota h3 { font-family: var(--font-display); font-size:12px; font-weight:600; color: var(--color-ink); margin-bottom:8px; }
+.nota p { font-size:11.5px; line-height:1.55; color: var(--color-ink-2); }
+.nota .mono { font-family: var(--font-mono); white-space:nowrap; }
+.nota .ciclo { display:flex; flex-wrap:nowrap; align-items:center; gap:3px; margin-bottom:12px;
+  font-family: var(--font-mono); font-size:10.5px; color: var(--color-muted); }
+.nota .ciclo b { font-weight:500; color: var(--color-accent); border:1px solid var(--color-accent-soft);
+  background: var(--color-accent-tint); border-radius:5px; padding:2px 4px; }
+.nota .alerta { border-left:3px solid var(--color-g1); padding-left:9px; margin-top:4px; }
+.nota .alerta strong { color: var(--color-g1-ink); font-weight:600; }
+.ley { display:flex; align-items:center; gap:10px; font-family: var(--font-mono); font-size:10px;
+  color: var(--color-neutral); margin-top:7px; }
+.ley .sw { display:inline-block; width:30px; flex:none; border-top:1.6px solid var(--color-accent); }
+.ley .sw.n { border-color: var(--color-neutral); border-top-width:1.4px; }
+.ley .sw.dash { border-top-style: dashed; }
+.ley .sw.dos { position:relative; }
+
+svg.edges { position:absolute; inset:0; width:1110px; height:1240px; pointer-events:none; }
+.e  { stroke: var(--color-accent); stroke-width:1.6; fill:none; }
+.n  { stroke: var(--color-neutral); stroke-width:1.4; fill:none; }
+.dash { stroke-dasharray:4 5; }
+.el { font-family: var(--font-mono); font-size:10.5px; fill: var(--color-neutral);
+  paint-order: stroke; stroke: var(--color-paper); stroke-width:4px; stroke-linejoin:round; }
+.el.a { fill: var(--color-accent); }
+
+.foot { margin-top: var(--space-xl); padding-top: var(--space-md); border-top: 1px solid var(--color-rule-2);
+  display:flex; justify-content:space-between; gap: var(--space-md); flex-wrap:wrap;
+  font-family: var(--font-mono); font-size:10px; color: var(--color-muted); }
+.foot a { color: inherit; text-decoration-color: var(--color-rule-2); text-underline-offset: 2px; }
+.foot a:hover { color: var(--color-accent); }
+
+@media (prefers-color-scheme: dark) {
+:root:not([data-theme="light"]) {
+  color-scheme: dark;
+  --color-paper:   oklch(18% 0.012 255);
+  --color-paper-2: oklch(22% 0.014 255);
+  --color-rule:    oklch(24% 0.013 255);
+  --color-rule-2:  oklch(38% 0.018 255);
+  --color-muted:   oklch(65% 0.014 255);
+  --color-neutral: oklch(72% 0.012 255);
+  --color-ink-2:   oklch(85% 0.010 255);
+  --color-ink:     oklch(94% 0.008 255);
+  --color-accent:  oklch(70% 0.16 256);
+  --color-graphite:oklch(31% 0.020 260);
+  --color-g1:      oklch(70% 0.14 55);
+  --color-g1-soft: oklch(58% 0.11 55);
+  --color-g1-ink:  oklch(78% 0.12 55);
+  --color-g1-tint: oklch(26% 0.030 60 / .40);
+  --color-g2:      oklch(66% 0.11 150);
+  --color-g2-soft: oklch(52% 0.08 150);
+  --color-g2-ink:  oklch(78% 0.10 150);
+  --color-g2-tint: oklch(25% 0.030 150 / .40);
+  --color-accent-soft: oklch(70% 0.16 256 / .5);
+  --color-accent-tint: oklch(28% 0.045 256 / .35);
+  --color-veil: oklch(18% 0.012 255 / .78);
+}
+:root:not([data-theme="light"]) .g-label img.lt, :root:not([data-theme="light"]) .tile img.lt { display:none; }
+:root:not([data-theme="light"]) .g-label img.dk, :root:not([data-theme="light"]) .tile img.dk { display:block; }
+:root:not([data-theme="light"]) .g-label img.plate { background:#fff; border-radius:3px; padding:2px; width:18px; height:18px; }
+}
+</style>
+</head>
+<body>
+<div class="page">
+
+  <header class="head">
+    <div>
+      <div class="kicker">vba-excel-claude-code / arquitectura en Mac / 14-11-2026</div>
+      <h1>VBA en Excel para Mac desde Claude Code</h1>
+    </div>
+    <p class="lede">Claude Code escribe el VBA, vba.py lo mete en Excel por AppleScript y unos tests contra una referencia en Python dicen si está bien.</p>
+  </header>
+
+  <div class="scroller">
+  <div class="canvas">
+
+    <!-- GRUPOS ============================================================ -->
+    <div class="group gb" style="left:328px; top:60px; width:330px; height:210px;">
+      <div class="g-label"><img src="%%ICON_vscode%%" alt="">VS Code</div>
+    </div>
+    <div class="group gn" style="left:876px; top:60px; width:180px; height:350px;">
+      <div class="g-label"><img class="lt" src="%%ICON_apple%%" alt=""><img class="dk" src="%%ICON_apple_dark%%" alt="">macOS · interfaz</div>
+    </div>
+    <div class="group ga" style="left:24px; top:430px; width:1056px; height:100px;">
+      <div class="g-label"><img class="plate" src="%%ICON_pmacros%%" alt="">Protecciones de macOS y Excel · están bien puestas: se gestionan, no se quitan</div>
+    </div>
+    <div class="group gc" style="left:24px; top:560px; width:1056px; height:422px;">
+      <div class="g-label"><img src="%%ICON_excel%%" alt="">Excel para Mac · el Excel abierto, uno solo</div>
+    </div>
+    <div class="group gc-nested" style="left:48px; top:608px; width:600px; height:350px;">
+      <div class="g-label"><img class="plate" src="%%ICON_libro%%" alt="">demo/vl-fondo.xlsm · libro de trabajo</div>
+    </div>
+    <div class="group gc-nested" style="left:672px; top:608px; width:180px; height:350px;">
+      <div class="g-label">Lanzador</div>
+    </div>
+    <div class="group gc-nested" style="left:876px; top:608px; width:180px; height:350px;">
+      <div class="g-label">Interfaz</div>
+    </div>
+    <div class="group gn" style="left:188px; top:1006px; width:460px; height:210px;">
+      <div class="g-label">Fuera de Excel</div>
+    </div>
+
+    <!-- PROTECCIONES ====================================================== -->
+    <div class="pill" style="left:36px; top:466px; width:150px;"><img src="%%ICON_pacceso%%" alt=""><span><b>Conceder acceso</b><i>sandbox de Excel</i></span></div>
+    <div class="pill" style="left:198px; top:466px; width:150px;"><img src="%%ICON_pmacros%%" alt=""><span><b>Habilitar macros</b><i>al abrir un .xlsm</i></span></div>
+    <div class="pill" style="left:360px; top:466px; width:180px;"><img src="%%ICON_pconfianza%%" alt=""><span><b>Acceso de confianza</b><i>modelo de objetos VBA</i></span></div>
+    <div class="pill" style="left:552px; top:466px; width:160px;"><img src="%%ICON_pauto%%" alt=""><span><b>Automatización</b><i>terminal → Excel</i></span></div>
+    <div class="pill" style="left:790px; top:466px; width:150px;"><img src="%%ICON_paccesib%%" alt=""><span><b>Accesibilidad</b><i>botones y menús</i></span></div>
+
+    <!-- NOTAS ============================================================= -->
+    <div class="nota" style="left:24px; top:60px; width:280px; height:210px;">
+      <h3>Ciclo obligatorio con vba.py</h3>
+      <div class="ciclo"><b>abrir</b>→<b>cargar</b>→<b>compilar</b>→<b>seguro</b></div>
+      <p class="alerta"><strong>Nunca detener una macro parada</strong> lanzada desde la terminal: Excel se cierra de golpe (3 de 3 veces). Por eso nada abre ventanas.</p>
+      <p style="margin-top:8px">Un solo agente con Excel y siempre <span class="mono">--libro</span>, nunca «el activo».</p>
+    </div>
+    <div class="nota" style="left:672px; top:1006px; width:408px; height:210px;">
+      <h3>Cómo leerlo</h3>
+      <div class="ley"><span class="sw"></span>órdenes y código: el camino principal</div>
+      <div class="ley"><span class="sw n"></span>interfaz y datos</div>
+      <div class="ley"><span class="sw n dash"></span>solo lectura, sin Excel (opcional)</div>
+      <p style="margin-top:12px">Punta doble: la orden devuelve texto a la terminal (<span class="mono">OK</span>, <span class="mono">FALLO</span> o <span class="mono">ERROR n</span>), nunca una ventana. Demo: <span class="mono">FALLO 10 de 15</span> → corregir Calculo → <span class="mono">OK 15/15</span>.</p>
+    </div>
+
+    <!-- FLECHAS =========================================================== -->
+    <svg class="edges" viewBox="0 0 1110 1240" aria-hidden="true">
+      <defs>
+        <marker id="ar" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse">
+          <path d="M0 0 L10 5 L0 10 z" fill="context-stroke"/>
+        </marker>
+      </defs>
+      <!-- fila de arriba -->
+      <path class="e" d="M452 150 H534" marker-end="url(#ar)"/>
+      <text class="el a" x="493" y="142" text-anchor="middle">ejecuta</text>
+      <path class="e" d="M602 150 H728" marker-end="url(#ar)"/>
+      <text class="el a" x="693" y="142" text-anchor="middle">python3</text>
+      <path class="n" d="M796 150 H932" marker-end="url(#ar)"/>
+      <text class="el" x="804" y="142">abrir · avisos</text>
+      <path class="n" d="M792 226 V290 H932" marker-end="url(#ar)"/>
+      <text class="el" x="802" y="252">compilar ·</text>
+      <text class="el" x="802" y="266">confianza</text>
+      <!-- AppleScript hasta el lanzador -->
+      <path class="e" d="M762 226 V664" marker-start="url(#ar)" marker-end="url(#ar)"/>
+      <text class="el a" x="772" y="330">osascript</text>
+      <text class="el a" x="772" y="344">abrir · guardar</text>
+      <text class="el a" x="772" y="358">celdas</text>
+      <text class="el a" x="772" y="372">run VB macro</text>
+      <!-- seguro: envoltorio temporal -->
+      <path class="e" d="M732 226 V590 H660 V698 H596" marker-start="url(#ar)" marker-end="url(#ar)"/>
+      <text class="el a" x="640" y="644" text-anchor="end">seguro → OK / FALLO</text>
+      <path class="e" d="M524 698 H452" marker-end="url(#ar)"/>
+      <text class="el a" x="488" y="690" text-anchor="middle">llama</text>
+      <!-- dentro del lanzador -->
+      <path class="n" d="M762 774 V804" marker-end="url(#ar)"/>
+      <text class="el" x="772" y="793">lee</text>
+      <path class="e" d="M728 838 H592" marker-start="url(#ar)" marker-end="url(#ar)"/>
+      <text class="el a" x="660" y="830" text-anchor="middle">mete y saca</text>
+      <!-- interfaz -->
+      <path class="n" d="M966 392 V664" marker-end="url(#ar)"/>
+      <path class="n" d="M1000 150 H1044 V838 H1004" marker-end="url(#ar)"/>
+      <!-- referencia y esperado -->
+      <path class="n" d="M418 804 V774" marker-end="url(#ar)"/>
+      <path class="n" d="M312 1096 H384" marker-end="url(#ar)"/>
+      <text class="el" x="348" y="1088" text-anchor="middle">escribe</text>
+      <path class="n" d="M418 1062 V914" marker-end="url(#ar)"/>
+      <text class="el" x="428" y="998">hoja-csv</text>
+      <path class="n dash" d="M558 1062 V962" marker-end="url(#ar)"/>
+      <text class="el" x="568" y="998">lee una copia</text>
+    </svg>
+
+    <!-- NODOS ============================================================= -->
+    <!-- fila 1 -->
+    <div class="node" style="left:352px;top:120px">
+      <div class="tile"><img src="%%ICON_claude%%" alt=""></div>
+      <div class="name"><span>Claude Code</span></div><div class="role"><span>escribe el VBA</span></div>
+    </div>
+    <div class="node" style="left:502px;top:120px">
+      <div class="tile"><img src="%%ICON_terminal%%" alt=""></div>
+      <div class="name"><span>Terminal zsh</span></div><div class="role"><span>dentro de VS Code</span></div>
+    </div>
+    <div class="node" style="left:696px;top:120px">
+      <div class="tile"><img src="%%ICON_python%%" alt=""></div>
+      <div class="name"><span>vba.py</span></div><div class="role"><span>Python 3 · órdenes</span></div>
+    </div>
+    <div class="node" style="left:900px;top:120px">
+      <div class="tile"><img src="%%ICON_systemevents%%" alt=""></div>
+      <div class="name"><span>System Events</span></div><div class="role"><span>Habilitar macros</span><br><span>y ventanas de aviso</span></div>
+    </div>
+    <div class="node" style="left:900px;top:260px">
+      <div class="tile"><img src="%%ICON_agentdesktop%%" alt=""></div>
+      <div class="name"><span>agent-desktop</span></div><div class="role"><span>v1.3.1, solo para</span><br><span>compilar, confianza</span><br><span>e instalación</span></div>
+    </div>
+
+    <!-- libro de trabajo -->
+    <div class="node" style="left:72px;top:668px">
+      <div class="tile"><img src="%%ICON_modulo%%" alt=""></div>
+      <div class="name"><span>Datos</span></div><div class="role"><span>módulo VBA</span></div>
+    </div>
+    <div class="node" style="left:212px;top:668px">
+      <div class="tile"><img src="%%ICON_modulo%%" alt=""></div>
+      <div class="name"><span>Informe</span></div><div class="role"><span>módulo VBA</span></div>
+    </div>
+    <div class="node" style="left:352px;top:668px">
+      <div class="tile"><img src="%%ICON_tests%%" alt=""></div>
+      <div class="name"><span>Tests</span></div><div class="role"><span>compara con Esperado</span></div>
+    </div>
+    <div class="node" style="left:492px;top:668px">
+      <div class="tile"><img src="%%ICON_envoltorio%%" alt=""></div>
+      <div class="name"><span>ZZEnvoltorio</span></div><div class="role"><span>temporal, de seguro</span></div>
+    </div>
+    <div class="node" style="left:72px;top:808px">
+      <div class="tile"><img src="%%ICON_sinventanas%%" alt=""></div>
+      <div class="name"><span>SinVentanas</span></div><div class="role"><span>MsgBox a _avisos</span></div>
+    </div>
+    <div class="node" style="left:352px;top:808px">
+      <div class="tile"><img src="%%ICON_esperado%%" alt=""></div>
+      <div class="name"><span>Hoja Esperado</span></div><div class="role"><span>de esperado.csv</span></div>
+    </div>
+    <div class="node" style="left:492px;top:808px">
+      <div class="tile"><img src="%%ICON_modulo%%" alt=""></div>
+      <div class="name"><span>Calculo</span></div><div class="role"><span>el módulo a corregir</span></div>
+    </div>
+
+    <!-- lanzador -->
+    <div class="node" style="left:696px;top:668px">
+      <div class="tile"><img src="%%ICON_codigo%%" alt=""></div>
+      <div class="name"><span>Hoja _codigo</span></div><div class="role"><span>en prueba.xlsm</span></div>
+    </div>
+    <div class="node" style="left:696px;top:808px">
+      <div class="tile"><img src="%%ICON_motor%%" alt=""></div>
+      <div class="name"><span>Motor VBA</span></div><div class="role"><span>CargarEn · Exportar</span><br><span>Modulos · Borrar</span></div>
+    </div>
+
+    <!-- interfaz de Excel -->
+    <div class="node" style="left:900px;top:668px">
+      <div class="tile"><img src="%%ICON_menus%%" alt=""></div>
+      <div class="name"><span>Editor y menús</span></div><div class="role"><span>Depurar › Compilar</span><br><span>Preferencias</span></div>
+    </div>
+    <div class="node" style="left:900px;top:808px">
+      <div class="tile"><img src="%%ICON_avisos%%" alt=""></div>
+      <div class="name"><span>Ventanas de aviso</span></div><div class="role"><span>Habilitar macros</span><br><span>errores de VBA</span></div>
+    </div>
+
+    <!-- fuera de Excel -->
+    <div class="node" style="left:492px;top:1066px">
+      <div class="tile"><img src="%%ICON_olevba%%" alt=""></div>
+      <div class="name"><span>olevba</span></div><div class="role"><span>oletools 0.60.2</span><br><span>opcional</span></div>
+    </div>
+    <div class="node" style="left:212px;top:1066px">
+      <div class="tile"><img src="%%ICON_python%%" alt=""></div>
+      <div class="name"><span>referencia.py</span></div><div class="role"><span>la regla escrita</span></div>
+    </div>
+    <div class="node" style="left:352px;top:1066px">
+      <div class="tile"><img src="%%ICON_csv%%" alt=""></div>
+      <div class="name"><span>esperado.csv</span></div><div class="role"><span>valores esperados</span></div>
+    </div>
+
+  </div>
+  </div>
+
+  <div class="foot">
+    <span>Probado el 14/11/2026 en macOS 26.6.2 con Excel 16.115. Detalle en docs/03, 04 y 08. Windows: sin probar.</span>
+    <span>iconos: devicon / svgl / Lucide · made with <a href="https://github.com/caru-ini/stack-diagram" target="_blank" rel="noopener">stack-diagram</a></span>
+  </div>
+
+</div>
+</body>
+</html>

@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Descartado y Windows</title>
+<style>
+/* engineered-paper theme (stack-diagram v0.3.0). Colores y fuentes solo por tokens. */
+:root {
+  color-scheme: light;
+  --color-paper:   oklch(98.5% 0.004 250);
+  --color-paper-2: oklch(96.5% 0.005 252);
+  --color-rule:    oklch(93% 0.007 255);
+  --color-rule-2:  oklch(83% 0.011 255);
+  --color-muted:   oklch(56% 0.013 255);
+  --color-neutral: oklch(46% 0.015 255);
+  --color-ink-2:   oklch(34% 0.018 257);
+  --color-ink:     oklch(24% 0.020 258);
+  --color-accent:  oklch(58% 0.20 256);
+  --color-graphite:oklch(24% 0.018 260);
+  /* grupo A, cálido: capa de protecciones */
+  --color-g1:      oklch(68% 0.15 55);
+  --color-g1-soft: oklch(78% 0.12 55);
+  --color-g1-ink:  oklch(52% 0.14 50);
+  --color-g1-tint: oklch(96.5% 0.015 60 / .5);
+  /* grupo C, verde: Excel */
+  --color-g2:      oklch(58% 0.12 150);
+  --color-g2-soft: oklch(72% 0.09 150);
+  --color-g2-ink:  oklch(45% 0.11 150);
+  --color-g2-tint: oklch(96.5% 0.018 150 / .5);
+  --color-accent-soft: oklch(58% 0.20 256 / .45);
+  --color-accent-tint: oklch(97% 0.012 256 / .5);
+  --font-display: "Geist", "Hiragino Sans", "Yu Gothic UI", "Noto Sans CJK JP", "Noto Sans JP", ui-sans-serif, system-ui, sans-serif;
+  --font-body: "Hiragino Sans", "Yu Gothic UI", "Noto Sans CJK JP", "Noto Sans JP", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
+  --space-xs: 4px; --space-sm: 8px; --space-md: 16px; --space-lg: 24px; --space-xl: 40px; --space-2xl: 64px;
+  --radius-card: 10px; --radius-tile: 12px;
+  --color-veil: oklch(98.5% 0.004 250 / .78);
+}
+[data-theme="dark"] {
+  color-scheme: dark;
+  --color-paper:   oklch(18% 0.012 255);
+  --color-paper-2: oklch(22% 0.014 255);
+  --color-rule:    oklch(24% 0.013 255);
+  --color-rule-2:  oklch(38% 0.018 255);
+  --color-muted:   oklch(65% 0.014 255);
+  --color-neutral: oklch(72% 0.012 255);
+  --color-ink-2:   oklch(85% 0.010 255);
+  --color-ink:     oklch(94% 0.008 255);
+  --color-accent:  oklch(70% 0.16 256);
+  --color-graphite:oklch(31% 0.020 260);
+  --color-g1:      oklch(70% 0.14 55);
+  --color-g1-soft: oklch(58% 0.11 55);
+  --color-g1-ink:  oklch(78% 0.12 55);
+  --color-g1-tint: oklch(26% 0.030 60 / .40);
+  --color-g2:      oklch(66% 0.11 150);
+  --color-g2-soft: oklch(52% 0.08 150);
+  --color-g2-ink:  oklch(78% 0.10 150);
+  --color-g2-tint: oklch(25% 0.030 150 / .40);
+  --color-accent-soft: oklch(70% 0.16 256 / .5);
+  --color-accent-tint: oklch(28% 0.045 256 / .35);
+  --color-veil: oklch(18% 0.012 255 / .78);
+}
+@font-face { font-family:"Geist"; font-style:normal; font-weight:100 900; font-display:swap;
+  src:url(data:font/woff2;base64,%%FONT_DISPLAY%%) format("woff2"); }
+@font-face { font-family:"JetBrains Mono"; font-style:normal; font-weight:100 800; font-display:swap;
+  src:url(data:font/woff2;base64,%%FONT_JBM%%) format("woff2"); }
+.kicker, .node .role, .el, .legend, .foot, .pill i, .nota .mono { letter-spacing: 0.04em; }
+* { margin:0; padding:0; box-sizing:border-box; }
+html, body { overflow-x: clip; }
+body { background: var(--color-paper); color: var(--color-ink); font-family: var(--font-body); padding: var(--space-xl) var(--space-lg) var(--space-2xl); }
+.page { width: fit-content; max-width: 100%; margin: 0 auto; }
+
+.head { display:grid; grid-template-columns: 1fr auto; gap: var(--space-lg); align-items:end;
+  padding-bottom: var(--space-md); border-bottom: 1px solid var(--color-rule-2); margin-bottom: var(--space-lg); }
+.kicker { font-family: var(--font-mono); font-size: 11px; color: var(--color-accent); margin-bottom: var(--space-sm); }
+h1 { font-family: var(--font-display); font-weight: 700; font-size: clamp(22px, 4vw, 30px); letter-spacing: -0.005em; line-height: 1.2; }
+.lede { max-width: 340px; font-size: 12px; line-height: 1.7; color: var(--color-neutral); padding-bottom: 2px; }
+@media (max-width: 680px) { .head { grid-template-columns: 1fr; align-items:start; } .lede { max-width:none; } }
+
+.scroller { overflow-x: auto; border: 1px solid var(--color-rule-2); border-radius: var(--radius-card); }
+.canvas { position: relative; width: 1110px; height: 540px; background: var(--color-paper);
+  background-image:
+    linear-gradient(var(--color-rule) 1px, transparent 1px),
+    linear-gradient(90deg, var(--color-rule) 1px, transparent 1px);
+  background-size: 24px 24px; background-position: -1px -1px; }
+
+.group { position:absolute; border-radius: var(--radius-tile); }
+.g-label { position:absolute; top:12px; left:12px; display:flex; align-items:center; gap:6px;
+  font-family: var(--font-display); font-size: 12px; font-weight: 600;
+  color: var(--color-neutral); white-space: nowrap; }
+.g-label img { width: 14px; height: 14px; }
+.g-label img.dk, .tile img.dk { display:none; }
+[data-theme="dark"] .g-label img.lt, [data-theme="dark"] .tile img.lt { display:none; }
+[data-theme="dark"] .g-label img.dk, [data-theme="dark"] .tile img.dk { display:block; }
+[data-theme="dark"] .g-label img.plate { background:#fff; border-radius:3px; padding:2px; width:18px; height:18px; }
+.group.ga { border:1.5px solid var(--color-g1); background: var(--color-g1-tint); }
+.group.gb { border:1.5px solid var(--color-accent-soft); background: var(--color-accent-tint); }
+.group.gc { border:1.5px solid var(--color-g2); background: var(--color-g2-tint); }
+.group.gc-nested { border:1.5px dashed var(--color-g2-soft); }
+.group.gn { border:1.5px dashed var(--color-rule-2); }
+.group.ga > .g-label { color: var(--color-g1-ink); }
+.group.gb > .g-label { color: var(--color-accent); }
+.group.gc > .g-label, .group.gc-nested > .g-label { color: var(--color-g2-ink); }
+
+.node { position:absolute; width:132px; text-align:center; }
+.tile { width:60px; height:60px; margin:0 auto; border-radius: var(--radius-tile);
+  background:#fff; border:1px solid var(--color-rule-2); display:grid; place-items:center;
+  box-shadow: 0 1px 2px oklch(24% 0.02 258 / 0.05); transition: border-color .15s cubic-bezier(0.16,1,0.3,1); }
+.node:hover .tile { border-color: var(--color-accent); }
+.tile img { width:34px; height:34px; object-fit:contain; }
+.node .name { font-family: var(--font-display); font-weight:600; font-size:13px; margin-top: var(--space-sm); letter-spacing:0; }
+.node .role { font-family: var(--font-mono); font-size:9.5px; color: var(--color-muted); margin-top:2px; line-height:1.45; }
+.node .name span, .node .role span { background: var(--color-veil); backdrop-filter: blur(1.5px);
+  padding: 0 var(--space-xs); border-radius: 3px; -webkit-box-decoration-break: clone; box-decoration-break: clone; }
+
+/* protecciones: pastillas dentro de la capa */
+.pill { position:absolute; height:48px; display:flex; align-items:center; gap:8px; padding:0 10px;
+  background: var(--color-paper); border:1px solid var(--color-g1-soft); border-radius: 8px; }
+.pill img { width:24px; height:24px; padding:3px; background:#fff; border:1px solid var(--color-rule-2); border-radius:6px; flex:none; }
+.pill b { display:block; font-family: var(--font-display); font-size:12px; font-weight:600; color: var(--color-ink); white-space:nowrap; }
+.pill i { display:block; font-style:normal; font-family: var(--font-mono); font-size:9.5px; color: var(--color-muted); white-space:nowrap; margin-top:1px; }
+
+/* notas dentro del lienzo */
+.nota { position:absolute; background: var(--color-paper-2); border:1px solid var(--color-rule-2);
+  border-radius: var(--radius-card); padding: 14px 16px; }
+.nota h3 { font-family: var(--font-display); font-size:12px; font-weight:600; color: var(--color-ink); margin-bottom:8px; }
+.nota p { font-size:11.5px; line-height:1.55; color: var(--color-ink-2); }
+.nota .mono { font-family: var(--font-mono); white-space:nowrap; }
+.nota .ciclo { display:flex; flex-wrap:nowrap; align-items:center; gap:3px; margin-bottom:12px;
+  font-family: var(--font-mono); font-size:10.5px; color: var(--color-muted); }
+.nota .ciclo b { font-weight:500; color: var(--color-accent); border:1px solid var(--color-accent-soft);
+  background: var(--color-accent-tint); border-radius:5px; padding:2px 4px; }
+.nota .alerta { border-left:3px solid var(--color-g1); padding-left:9px; margin-top:4px; }
+.nota .alerta strong { color: var(--color-g1-ink); font-weight:600; }
+.ley { display:flex; align-items:center; gap:10px; font-family: var(--font-mono); font-size:10px;
+  color: var(--color-neutral); margin-top:7px; }
+.ley .sw { display:inline-block; width:30px; flex:none; border-top:1.6px solid var(--color-accent); }
+.ley .sw.n { border-color: var(--color-neutral); border-top-width:1.4px; }
+.ley .sw.dash { border-top-style: dashed; }
+.ley .sw.dos { position:relative; }
+
+svg.edges { position:absolute; inset:0; width:1110px; height:540px; pointer-events:none; }
+.e  { stroke: var(--color-accent); stroke-width:1.6; fill:none; }
+.n  { stroke: var(--color-neutral); stroke-width:1.4; fill:none; }
+.dash { stroke-dasharray:4 5; }
+.el { font-family: var(--font-mono); font-size:10.5px; fill: var(--color-neutral);
+  paint-order: stroke; stroke: var(--color-paper); stroke-width:4px; stroke-linejoin:round; }
+.el.a { fill: var(--color-accent); }
+
+.foot { margin-top: var(--space-xl); padding-top: var(--space-md); border-top: 1px solid var(--color-rule-2);
+  display:flex; justify-content:space-between; gap: var(--space-md); flex-wrap:wrap;
+  font-family: var(--font-mono); font-size:10px; color: var(--color-muted); }
+.foot a { color: inherit; text-decoration-color: var(--color-rule-2); text-underline-offset: 2px; }
+.foot a:hover { color: var(--color-accent); }
+.node.off .tile { opacity:.5; border-style:dashed; box-shadow:none; }
+.node.off .name span { color: var(--color-muted); text-decoration: line-through; text-decoration-thickness:1.5px; }
+.ley .sw.tachado { border:none; width:30px; font-family: var(--font-display); font-weight:600; font-size:11px; color: var(--color-muted); text-decoration: line-through; text-align:center; }
+
+@media (prefers-color-scheme: dark) {
+:root:not([data-theme="light"]) {
+  color-scheme: dark;
+  --color-paper:   oklch(18% 0.012 255);
+  --color-paper-2: oklch(22% 0.014 255);
+  --color-rule:    oklch(24% 0.013 255);
+  --color-rule-2:  oklch(38% 0.018 255);
+  --color-muted:   oklch(65% 0.014 255);
+  --color-neutral: oklch(72% 0.012 255);
+  --color-ink-2:   oklch(85% 0.010 255);
+  --color-ink:     oklch(94% 0.008 255);
+  --color-accent:  oklch(70% 0.16 256);
+  --color-graphite:oklch(31% 0.020 260);
+  --color-g1:      oklch(70% 0.14 55);
+  --color-g1-soft: oklch(58% 0.11 55);
+  --color-g1-ink:  oklch(78% 0.12 55);
+  --color-g1-tint: oklch(26% 0.030 60 / .40);
+  --color-g2:      oklch(66% 0.11 150);
+  --color-g2-soft: oklch(52% 0.08 150);
+  --color-g2-ink:  oklch(78% 0.10 150);
+  --color-g2-tint: oklch(25% 0.030 150 / .40);
+  --color-accent-soft: oklch(70% 0.16 256 / .5);
+  --color-accent-tint: oklch(28% 0.045 256 / .35);
+  --color-veil: oklch(18% 0.012 255 / .78);
+}
+:root:not([data-theme="light"]) .g-label img.lt, :root:not([data-theme="light"]) .tile img.lt { display:none; }
+:root:not([data-theme="light"]) .g-label img.dk, :root:not([data-theme="light"]) .tile img.dk { display:block; }
+:root:not([data-theme="light"]) .g-label img.plate { background:#fff; border-radius:3px; padding:2px; width:18px; height:18px; }
+}
+</style>
+</head>
+<body>
+<div class="page">
+
+  <header class="head">
+    <div>
+      <div class="kicker">vba-excel-claude-code / descartado y Windows / 14-11-2026</div>
+      <h1>Lo que no se usa y la vía Windows</h1>
+    </div>
+    <p class="lede">Caminos probados o estudiados que no entraron en la solución, y la vía COM de Windows, escrita pero sin probar.</p>
+  </header>
+
+  <div class="scroller">
+  <div class="canvas">
+
+    <div class="group gn" style="left:24px; top:60px; width:1062px; height:210px;">
+      <div class="g-label">Descartado o no usado · el motivo, debajo</div>
+    </div>
+    <div class="group gn" style="left:24px; top:300px; width:500px; height:210px;">
+      <div class="g-label"><img src="%%ICON_windows%%" alt="">Windows · escrito, sin probar</div>
+    </div>
+
+    <div class="nota" style="left:548px; top:300px; width:538px; height:210px;">
+      <h3>Windows: en qué cambia</h3>
+      <p>Cada orden abre su propio Excel, invisible, y lo cierra al terminar: COM, documentado por Microsoft. En Mac solo hay AppleScript y se trabaja sobre el Excel abierto, uno solo.</p>
+      <p style="margin-top:8px"><span class="mono">herramientas/windows/vba.ps1</span> está escrito pero no se ha ejecutado nunca. Pruebas W0 a W8 pendientes.</p>
+      <div class="ley"><span class="sw n dash"></span>sin probar</div>
+      <div class="ley"><span class="sw tachado">abc</span>atenuado y tachado: descartado o no usado</div>
+    </div>
+
+    <svg class="edges" viewBox="0 0 1110 540" aria-hidden="true">
+      <defs>
+        <marker id="ar" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse">
+          <path d="M0 0 L10 5 L0 10 z" fill="context-stroke"/>
+        </marker>
+      </defs>
+      <path class="n dash" d="M148 390 H240" marker-end="url(#ar)"/>
+      <path class="n dash" d="M308 390 H400" marker-end="url(#ar)"/>
+      <text class="el" x="354" y="382" text-anchor="middle">abre</text>
+    </svg>
+
+    <!-- descartado -->
+    <div class="node off" style="left:48px;top:120px">
+      <div class="tile"><img src="%%ICON_teclas%%" alt=""></div>
+      <div class="name"><span>Teclas con AppleScript</span></div><div class="role"><span>van a otra ventana</span></div>
+    </div>
+    <div class="node off" style="left:195px;top:120px">
+      <div class="tile"><img src="%%ICON_capturas%%" alt=""></div>
+      <div class="name"><span>Control por capturas</span></div><div class="role"><span>lento y frágil</span></div>
+    </div>
+    <div class="node off" style="left:342px;top:120px">
+      <div class="tile"><img src="%%ICON_xlwings%%" alt=""></div>
+      <div class="name"><span>xlwings</span></div><div class="role"><span>no probada; usa</span><br><span>AppleScript debajo</span></div>
+    </div>
+    <div class="node off" style="left:489px;top:120px">
+      <div class="tile"><img src="%%ICON_libreoffice%%" alt=""></div>
+      <div class="name"><span>LibreOffice</span></div><div class="role"><span>no es Excel</span></div>
+    </div>
+    <div class="node off" style="left:636px;top:120px">
+      <div class="tile"><img src="%%ICON_apprun%%" alt=""></div>
+      <div class="name"><span>Application.Run</span></div><div class="role"><span>con On Error no</span><br><span>atrapa el error</span></div>
+    </div>
+    <div class="node off" style="left:783px;top:120px">
+      <div class="tile"><img src="%%ICON_importar%%" alt=""></div>
+      <div class="name"><span>VBComponents</span><br><span>.Import</span></div><div class="role"><span>crea Nombre1 al lado</span></div>
+    </div>
+    <div class="node off" style="left:930px;top:120px">
+      <div class="tile"><img src="%%ICON_xlam%%" alt=""></div>
+      <div class="name"><span>Complemento .xlam</span></div><div class="role"><span>no se pudo crear</span></div>
+    </div>
+
+    <!-- Windows -->
+    <div class="node" style="left:48px;top:360px">
+      <div class="tile"><img src="%%ICON_powershell%%" alt=""></div>
+      <div class="name"><span>PowerShell</span></div><div class="role"><span>vba.ps1</span><br><span>o Python + pywin32</span></div>
+    </div>
+    <div class="node" style="left:208px;top:360px">
+      <div class="tile"><img src="%%ICON_com%%" alt=""></div>
+      <div class="name"><span>COM</span></div><div class="role"><span>viene con Windows</span></div>
+    </div>
+    <div class="node" style="left:368px;top:360px">
+      <div class="tile"><img src="%%ICON_excel%%" alt=""></div>
+      <div class="name"><span>Excel propio</span></div><div class="role"><span>nuevo e invisible</span></div>
+    </div>
+
+  </div>
+  </div>
+
+  <div class="foot">
+    <span>Motivos en docs/04-resultados.md y docs/08-aprendizajes.md. Vía Windows en docs/06-windows.md.</span>
+    <span>iconos: svgl / Lucide · made with <a href="https://github.com/caru-ini/stack-diagram" target="_blank" rel="noopener">stack-diagram</a></span>
+  </div>
+
+</div>
+</body>
+</html>

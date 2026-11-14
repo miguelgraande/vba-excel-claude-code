@@ -1,0 +1,23 @@
+# Archivos de bloqueo que Excel crea mientras un libro está abierto
+~$*
+
+# Copias autorrecuperadas de Excel
+*(version *).xlsb
+
+# Python
+__pycache__/
+*.pyc
+
+# macOS
+.DS_Store
+
+# Configuración local de agentes de cada máquina
+.agents/
+
+# Secretos (no debería haber ninguno)
+.env
+.env.*
+
+# Material privado que se queda en local: contexto de la clase y método de trabajo propio
+contexto/
+organizacion/

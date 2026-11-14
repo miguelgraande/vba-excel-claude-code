@@ -1,0 +1,214 @@
+{
+  "claude": {
+    "source": "devicon",
+    "url": "https://raw.githubusercontent.com/devicons/devicon/master/icons/claude/claude-original.svg",
+    "file": "claude.svg",
+    "bytes": 1835
+  },
+  "vscode": {
+    "source": "devicon",
+    "url": "https://raw.githubusercontent.com/devicons/devicon/master/icons/vscode/vscode-original.svg",
+    "file": "vscode.svg",
+    "bytes": 3404
+  },
+  "python": {
+    "source": "svgl",
+    "url": "https://svgl.app/library/python.svg",
+    "file": "python.svg",
+    "bytes": 1126
+  },
+  "excel": {
+    "source": "svgl",
+    "url": "https://svgl.app/library/microsoft-excel.svg",
+    "file": "excel.svg",
+    "bytes": 5282
+  },
+  "apple": {
+    "source": "svgl",
+    "url": "https://svgl.app/library/apple.svg",
+    "file": "apple.svg",
+    "bytes": 678,
+    "dark_file": "apple_dark.svg",
+    "dark_url": "https://svgl.app/library/apple_dark.svg"
+  },
+  "powershell": {
+    "source": "svgl",
+    "url": "https://svgl.app/library/powershell.svg",
+    "file": "powershell.svg",
+    "bytes": 1809
+  },
+  "windows": {
+    "source": "svgl",
+    "url": "https://svgl.app/library/windows.svg",
+    "file": "windows.svg",
+    "bytes": 297
+  },
+  "terminal": {
+    "source": "lucide",
+    "url": "https://cdn.jsdelivr.net/npm/lucide-static/icons/square-terminal.svg",
+    "file": "terminal.svg",
+    "bytes": 404
+  },
+  "systemevents": {
+    "source": "lucide",
+    "url": "https://cdn.jsdelivr.net/npm/lucide-static/icons/mouse-pointer-click.svg",
+    "file": "systemevents.svg",
+    "bytes": 550
+  },
+  "agentdesktop": {
+    "source": "lucide",
+    "url": "https://cdn.jsdelivr.net/npm/lucide-static/icons/list-tree.svg",
+    "file": "agentdesktop.svg",
+    "bytes": 432
+  },
+  "olevba": {
+    "source": "lucide",
+    "url": "https://cdn.jsdelivr.net/npm/lucide-static/icons/file-search.svg",
+    "file": "olevba.svg",
+    "bytes": 525
+  },
+  "motor": {
+    "source": "lucide",
+    "url": "https://cdn.jsdelivr.net/npm/lucide-static/icons/cog.svg",
+    "file": "motor.svg",
+    "bytes": 695
+  },
+  "codigo": {
+    "source": "lucide",
+    "url": "https://cdn.jsdelivr.net/npm/lucide-static/icons/sheet.svg",
+    "file": "codigo.svg",
+    "bytes": 505
+  },
+  "modulo": {
+    "source": "lucide",
+    "url": "https://cdn.jsdelivr.net/npm/lucide-static/icons/file-code.svg",
+    "file": "modulo.svg",
+    "bytes": 521
+  },
+  "tests": {
+    "source": "lucide",
+    "url": "https://cdn.jsdelivr.net/npm/lucide-static/icons/flask-conical.svg",
+    "file": "tests.svg",
+    "bytes": 464
+  },
+  "esperado": {
+    "source": "lucide",
+    "url": "https://cdn.jsdelivr.net/npm/lucide-static/icons/table.svg",
+    "file": "esperado.svg",
+    "bytes": 405
+  },
+  "envoltorio": {
+    "source": "lucide",
+    "url": "https://cdn.jsdelivr.net/npm/lucide-static/icons/package.svg",
+    "file": "envoltorio.svg",
+    "bytes": 521
+  },
+  "sinventanas": {
+    "source": "lucide",
+    "url": "https://cdn.jsdelivr.net/npm/lucide-static/icons/message-square-off.svg",
+    "file": "sinventanas.svg",
+    "bytes": 473
+  },
+  "menus": {
+    "source": "lucide",
+    "url": "https://cdn.jsdelivr.net/npm/lucide-static/icons/square-menu.svg",
+    "file": "menus.svg",
+    "bytes": 411
+  },
+  "avisos": {
+    "source": "lucide",
+    "url": "https://cdn.jsdelivr.net/npm/lucide-static/icons/message-square-warning.svg",
+    "file": "avisos.svg",
+    "bytes": 478
+  },
+  "libro": {
+    "source": "lucide",
+    "url": "https://cdn.jsdelivr.net/npm/lucide-static/icons/file-spreadsheet.svg",
+    "file": "libro.svg",
+    "bytes": 551
+  },
+  "pacceso": {
+    "source": "lucide",
+    "url": "https://cdn.jsdelivr.net/npm/lucide-static/icons/folder-lock.svg",
+    "file": "pacceso.svg",
+    "bytes": 502
+  },
+  "pmacros": {
+    "source": "lucide",
+    "url": "https://cdn.jsdelivr.net/npm/lucide-static/icons/shield-alert.svg",
+    "file": "pmacros.svg",
+    "bytes": 515
+  },
+  "pconfianza": {
+    "source": "lucide",
+    "url": "https://cdn.jsdelivr.net/npm/lucide-static/icons/key-round.svg",
+    "file": "pconfianza.svg",
+    "bytes": 530
+  },
+  "pauto": {
+    "source": "lucide",
+    "url": "https://cdn.jsdelivr.net/npm/lucide-static/icons/bot.svg",
+    "file": "pauto.svg",
+    "bytes": 451
+  },
+  "paccesib": {
+    "source": "lucide",
+    "url": "https://cdn.jsdelivr.net/npm/lucide-static/icons/accessibility.svg",
+    "file": "paccesib.svg",
+    "bytes": 479
+  },
+  "teclas": {
+    "source": "lucide",
+    "url": "https://cdn.jsdelivr.net/npm/lucide-static/icons/keyboard.svg",
+    "file": "teclas.svg",
+    "bytes": 537
+  },
+  "capturas": {
+    "source": "lucide",
+    "url": "https://cdn.jsdelivr.net/npm/lucide-static/icons/scan-eye.svg",
+    "file": "capturas.svg",
+    "bytes": 584
+  },
+  "apprun": {
+    "source": "lucide",
+    "url": "https://cdn.jsdelivr.net/npm/lucide-static/icons/play.svg",
+    "file": "apprun.svg",
+    "bytes": 378
+  },
+  "importar": {
+    "source": "lucide",
+    "url": "https://cdn.jsdelivr.net/npm/lucide-static/icons/file-input.svg",
+    "file": "importar.svg",
+    "bytes": 508
+  },
+  "xlam": {
+    "source": "lucide",
+    "url": "https://cdn.jsdelivr.net/npm/lucide-static/icons/puzzle.svg",
+    "file": "xlam.svg",
+    "bytes": 759
+  },
+  "com": {
+    "source": "lucide",
+    "url": "https://cdn.jsdelivr.net/npm/lucide-static/icons/plug.svg",
+    "file": "com.svg",
+    "bytes": 435
+  },
+  "csv": {
+    "source": "lucide",
+    "url": "https://cdn.jsdelivr.net/npm/lucide-static/icons/file-text.svg",
+    "file": "csv.svg",
+    "bytes": 521
+  },
+  "libreoffice": {
+    "source": "lucide",
+    "url": "https://cdn.jsdelivr.net/npm/lucide-static/icons/file-x.svg",
+    "file": "libreoffice.svg",
+    "bytes": 506
+  },
+  "xlwings": {
+    "source": "lucide",
+    "url": "https://cdn.jsdelivr.net/npm/lucide-static/icons/box.svg",
+    "file": "xlwings.svg",
+    "bytes": 472
+  }
+}

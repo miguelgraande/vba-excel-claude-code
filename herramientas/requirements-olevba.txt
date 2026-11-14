@@ -1,0 +1,15 @@
+# Dependencias congeladas de olevba (oletools 0.60.2) probadas el 14/11/2026.
+# Instalar en un entorno aislado:
+#   python3 -m venv ~/workspaces/venvs/oletools
+#   ~/workspaces/venvs/oletools/bin/pip install -r herramientas/requirements-olevba.txt
+# Opcional: no hace falta para el ciclo de trabajo. Ver docs/09-instalacion.md.
+cffi==2.1.1
+colorclass==2.2.2
+cryptography==50.0.2
+easygui==0.98.3
+msoffcrypto-tool==6.1.0
+olefile==0.47
+oletools==0.60.2
+pcodedmp==1.2.6
+pycparser==3.12
+pyparsing==3.3.3
