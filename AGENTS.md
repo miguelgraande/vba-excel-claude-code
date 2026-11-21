@@ -5,7 +5,10 @@ antes de tocar Excel. Repositorio: <https://github.com/miguelgraande/vba-excel-c
 
 ## Lo primero: ofrecer el ejemplo
 
-En la primera conversación en esta carpeta, después de presentarte en dos líneas, pregunta al usuario:
+**Si el equipo es Windows**, no ofrezcas este ejemplo: la demo guiada es de Mac (AppleScript). Explica
+el estado en dos líneas y ofrece las pruebas de [docs/10-probar-en-windows.md](docs/10-probar-en-windows.md).
+
+En la primera conversación en esta carpeta (en un Mac), después de presentarte en dos líneas, pregunta al usuario:
 
 > Este repositorio trae un ejemplo listo: una herramienta VBA inventada de valor liquidativo con un error
 > en las comisiones. Puedo abrirla en tu Excel, pasar los tests (fallan 10 de 15), sacar el código,
@@ -66,7 +69,7 @@ solución está aparte, en [demo/solucion/SOLUCION.md](demo/solucion/SOLUCION.md
 | 3 | [docs/03-solucion-mac.md](docs/03-solucion-mac.md) | Cada pieza, el ciclo de trabajo y la referencia de órdenes de `vba.py` |
 | 4 | [docs/05-buenas-practicas.md](docs/05-buenas-practicas.md) | Reglas de oro, permisos, tabla de síntomas y recuperación si Excel se cae |
 | 5 | [docs/04-resultados.md](docs/04-resultados.md) | Qué está probado, con qué orden exacta y qué falló |
-| 6 | [docs/06-windows.md](docs/06-windows.md) | Vía Windows por COM. Sin probar |
+| 6 | [docs/06-windows.md](docs/06-windows.md) | Vía Windows por COM. Sin probar por nosotros. Para probarla en Windows: [docs/10-probar-en-windows.md](docs/10-probar-en-windows.md) |
 | 7 | [docs/07-vba-python-power-bi.md](docs/07-vba-python-power-bi.md) | Opinión: cuándo VBA, Python o Power BI. No probado |
 | 8 | [docs/01-contexto.md](docs/01-contexto.md) | El problema planteado y lo que falta por demostrar |
 | 9 | [docs/02-recorrido.md](docs/02-recorrido.md) | Cómo se llegó a la solución, por etapas |

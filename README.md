@@ -56,7 +56,9 @@ Instalación paso a paso: [docs/09-instalacion.md](docs/09-instalacion.md).
 
 ## Inicio rápido
 
-**La forma más rápida de verlo funcionar:** abre la carpeta con Claude Code y te ofrecerá ejecutar el
+**¿Usas Windows?** La demo es de Mac. Sigue [docs/10-probar-en-windows.md](docs/10-probar-en-windows.md).
+
+**La forma más rápida de verlo funcionar (Mac):** abre la carpeta con Claude Code y te ofrecerá ejecutar el
 ejemplo. O lánzalo tú, con Excel abierto y el ajuste de confianza activado:
 
 ```bash
@@ -90,7 +92,8 @@ Por eso el orden es siempre `cargar` → `compilar` → `seguro`.
 | [docs/03-solucion-mac.md](docs/03-solucion-mac.md) | La solución pieza a pieza, preparación, ciclo de trabajo, órdenes y demo |
 | [docs/04-resultados.md](docs/04-resultados.md) | Todas las pruebas con su evidencia, lo que no funcionó y las alternativas evaluadas |
 | [docs/05-buenas-practicas.md](docs/05-buenas-practicas.md) | Reglas de oro, permisos, solución de problemas por síntoma, recuperación, buenas prácticas al escribir VBA y glosario |
-| [docs/06-windows.md](docs/06-windows.md) | Vía Windows por COM y su script. Sin probar |
+| [docs/06-windows.md](docs/06-windows.md) | Vía Windows por COM, sus scripts y sus riesgos. Sin probar por nosotros |
+| [docs/10-probar-en-windows.md](docs/10-probar-en-windows.md) | **Si usas Windows:** estado, qué falta y las pruebas W0 a W11 con órdenes exactas y salidas esperadas |
 | [docs/07-vba-python-power-bi.md](docs/07-vba-python-power-bi.md) | Opinión: cuándo VBA, cuándo Python o Power BI, la alternativa de una aplicación a medida en Python y el plan por fases para migrar una herramienta heredada. No probado |
 | [docs/00-plan-inicial.md](docs/00-plan-inicial.md) | Plan original del 13/11 con la lista de pruebas. Histórico |
 | [docs/bitacora.md](docs/bitacora.md) | Hechos de la sesión del 14/11, en orden y con evidencia. Fuente de los demás |
@@ -133,8 +136,10 @@ Detalle y porqué en [docs/01-contexto.md](docs/01-contexto.md#lo-que-todavía-n
 
 1. **Que Claude encuentre el error sin saber dónde está.** En la prueba, la sesión ya conocía el error
    porque lo diseñó. Falta una sesión limpia que solo reciba la incidencia y llegue sola a `OK 15/15`.
-2. **Windows.** La vía COM está preparada pero no se ha ejecutado nunca. En un portátil de empresa,
-   informática puede bloquear el ajuste de confianza.
+2. **Windows.** La vía COM está preparada. Le funcionó a la profesora (informe de terceros, sin salida),
+   pero nosotros no la hemos probado: las pruebas están en
+   [docs/10-probar-en-windows.md](docs/10-probar-en-windows.md). En un portátil de empresa, informática
+   puede bloquear el ajuste de confianza.
 3. **La herramienta real.** Más grande y de 2015. Con muchos `MsgBox`, formularios o errores sin
    controlar habrá que aplicar `compilar`, `seguro` y SinVentanas, que no cubre formularios ni
    `Application.InputBox`.
@@ -142,7 +147,9 @@ Detalle y porqué en [docs/01-contexto.md](docs/01-contexto.md#lo-que-todavía-n
 ## Estado y límites
 
 - **Mac: funciona el ciclo completo** (pruebas M1 a M8 en [docs/04-resultados.md](docs/04-resultados.md)).
-- **Windows: sin probar.** Hay un script y un plan de pruebas, pero no se ha ejecutado nunca.
+- **Windows: sin probar por nosotros.** `vba.ps1` le funcionó a la profesora (nos lo contaron, sin la
+  salida). `vba-nuevo.ps1` añade `compilar` y un vigía de ventanas, sin ejecutar. Lo que falta son las
+  pruebas: [docs/10-probar-en-windows.md](docs/10-probar-en-windows.md).
 - Solo libros con datos inventados. Antes de usarlo con una herramienta real, hace falta el permiso de la organización propietaria.
 - SinVentanas no cubre `Application.InputBox`, formularios ni diálogos de Excel.
 - `compilar` a veces responde `SIN VERIFICAR` (causa sin aclarar). Responde `OK compila <libro>`;

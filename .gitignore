@@ -18,6 +18,9 @@ __pycache__/
 .env
 .env.*
 
+# Copias de trabajo de las pruebas de Windows (docs/10-probar-en-windows.md)
+pruebas-win/
+
 # Material privado que se queda en local: contexto de la clase y método de trabajo propio
 contexto/
 organizacion/

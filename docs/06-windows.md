@@ -371,6 +371,10 @@ with xw.App(visible=False) as app:
 
 ## 11. Plan de pruebas en Windows
 
+**Para ejecutarlas, usa [10-probar-en-windows.md](10-probar-en-windows.md)**: órdenes exactas y salidas
+esperadas con los libros del repositorio. Esta tabla es el resumen original; si no coinciden, manda la 10
+(por ejemplo, aquí W3 usa una función `Suma` que no existe en ningún libro del repositorio).
+
 Las mismas W0 a W8 del [plan inicial](00-plan-inicial.md), con el script:
 
 | ID | Comando | Qué confirma |

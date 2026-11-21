@@ -113,9 +113,11 @@ Demostrado en Mac el 14/11/2026 con una herramienta inventada de valor liquidati
 >
 > **2. Windows.**
 > La persona que mantiene la herramienta probablemente usa Windows (usa atajos como Alt+F11 y F12).
-> La vía COM está preparada ([06-windows.md](06-windows.md) y `herramientas/windows/vba.ps1`), pero no
-> se ha ejecutado nunca. En un portátil de empresa, informática puede bloquear por directiva el ajuste
-> de confianza que hace falta para meter y sacar código.
+> La vía COM está preparada ([06-windows.md](06-windows.md) y `herramientas/windows/vba.ps1`). El
+> 21/11 nos contaron que a la profesora le funcionó en Windows, pero sin la orden ni la salida; nosotros
+> no la hemos ejecutado. Las pruebas que faltan, con órdenes y salidas esperadas, están en
+> [10-probar-en-windows.md](10-probar-en-windows.md). En un portátil de empresa, informática puede
+> bloquear por directiva el ajuste de confianza que hace falta para meter y sacar código.
 >
 > **3. La herramienta real.**
 > Es más grande y de 2015. Si tiene muchos `MsgBox`, formularios (`UserForm`), `Application.InputBox` o
