@@ -369,9 +369,10 @@ try {
     $excel.EnableEvents = [bool] $Eventos
     $excel.ScreenUpdating = [bool] $Visible
 
-    # Macros apagadas salvo para ejecutar y compilar: asi exportar/modulos/importar no disparan codigo al abrir.
-    # compilar las deja activas por si con el proyecto desactivado el editor no compila (sin comprobar).
-    if ($Comando -in @('ejecutar', 'compilar')) { $excel.AutomationSecurity = $MSO_SEGURIDAD_BAJA }
+    # Macros apagadas salvo para ejecutar: asi modulos/exportar/importar/compilar no disparan codigo al abrir
+    # (Workbook_Open ni funciones VBA de las celdas al recalcular). Si con macros apagadas el editor
+    # no compilara, compilar responde SIN VERIFICAR, nunca un OK falso (sin comprobar).
+    if ($Comando -eq 'ejecutar') { $excel.AutomationSecurity = $MSO_SEGURIDAD_BAJA }
     else { $excel.AutomationSecurity = $MSO_SEGURIDAD_DESACTIVADA }
 
     # Open(FileName, UpdateLinks=0, ReadOnly). compilar toca el codigo solo en memoria y no guarda

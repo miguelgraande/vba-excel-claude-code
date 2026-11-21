@@ -111,7 +111,7 @@ Qué significa para un portátil de empresa:
 | PID propio | Compara los `EXCEL.EXE` antes y después de crearla para saber cuál es la nuestra | **[SUPOSICIÓN]**: si otro Excel arranca en el mismo segundo, no se identifica y se avisa |
 | `Visible = $false` | Excel abierto por COM arranca invisible | **[OFICIAL]** KB 288902 (tabla) |
 | `DisplayAlerts = $false` | Quita los avisos de Excel y elige la respuesta por defecto. En código entre procesos no se reactiva solo | **[OFICIAL]** |
-| `AutomationSecurity` | Al abrir por COM, las macros quedan **activadas** por defecto (`msoAutomationSecurityLow`). El script usa `ForceDisable` (3) para `modulos`, `exportar` e `importar`, y `Low` (1) solo para `ejecutar` | **[OFICIAL]** para los valores. **[SUPOSICIÓN]** que con macros apagadas se puede seguir leyendo y escribiendo el VBA |
+| `AutomationSecurity` | Al abrir por COM, las macros quedan **activadas** por defecto (`msoAutomationSecurityLow`). El script usa `ForceDisable` (3) para `modulos`, `exportar`, `importar` y `compilar`, y `Low` (1) solo para `ejecutar` | **[OFICIAL]** para los valores. **[SUPOSICIÓN]** que con macros apagadas se puede seguir leyendo y escribiendo el VBA |
 | `EnableEvents = $false` | Evita que `Workbook_Open` y otros eventos se disparen al abrir. `-Eventos` los activa | **[OFICIAL]** la propiedad. **[SUPOSICIÓN]** que impide `Workbook_Open` al abrir por COM |
 | `Workbooks.Open(ruta, 0, soloLectura)` | Sin actualizar vínculos. Solo lectura para `modulos` y `exportar` | **[OFICIAL]** |
 | `Close($false)` + `Quit()` | Cierra sin guardar y sale. Con `DisplayAlerts = $false`, `Quit` no pregunta | **[OFICIAL]** |
@@ -486,4 +486,6 @@ Suposiciones que hay que comprobar (W6, W9, W10):
 - Que `Execute()` no se bloquea para siempre mientras el aviso está abierto (el vigía lo cierra).
 - Que el botón Compilar se desactiva tras compilar bien. Si no, la orden dirá `SIN VERIFICAR`, nunca un
   `OK` falso.
-- Que `compilar` funciona con las macros activadas (`AutomationSecurity` Low) y los eventos apagados.
+- Que `compilar` funciona con las macros apagadas (`AutomationSecurity` ForceDisable), como `modulos`,
+  `exportar` e `importar`. Se apagan para no ejecutar código del libro al abrirlo (`Workbook_Open` o
+  funciones VBA en celdas al recalcular). Si el editor no compilara así, la orden dirá `SIN VERIFICAR`.
