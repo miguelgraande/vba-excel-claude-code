@@ -103,8 +103,9 @@ Ese paso no estaba en las ejecuciones de esta tabla; se probó después (ver la 
 
 | ID | Prueba | Resultado |
 |---|---|---|
-| W0 a W10 | Vía COM con `herramientas/windows/vba.ps1` | **Sin probar.** No había un Windows disponible. W9 y W10 (`compilar`) y el nuevo vigía de W6 se añadieron el 21/11, adaptados de MCP-Access ([06-windows.md §13](06-windows.md#13-técnicas-tomadas-de-mcp-access)). Plan en [06-windows.md](06-windows.md#11-plan-de-pruebas-en-windows) |
-| Extra | Validar la sintaxis de `vba.ps1` con PowerShell en el Mac | **Pendiente.** Se estaba instalando; a las 01:27 `pwsh` aún no estaba. El 21/11 tampoco había `pwsh`. En Mac no hay COM: solo serviría para comprobar sintaxis |
+| W0 a W8 | Vía COM con `herramientas/windows/vba.ps1` | **Sin probar por nosotros.** No había un Windows disponible. Informe de terceros del 21/11: la profesora lo usó en Windows y le funcionó. Falta la orden exacta, la versión de Excel y la salida para apuntarlo como prueba. Plan en [06-windows.md](06-windows.md#11-plan-de-pruebas-en-windows) |
+| W9 a W11 | `compilar` y vigía de ventanas en `herramientas/windows/vba-nuevo.ps1` | **Sin probar.** Añadidos el 21/11, adaptados de MCP-Access ([06-windows.md §13](06-windows.md#13-técnicas-tomadas-de-mcp-access)). Separados de `vba.ps1` para no tocar la versión que funcionó |
+| Extra | Validar la sintaxis de `vba.ps1` y `vba-nuevo.ps1` con PowerShell en el Mac | **OK (21/11, PowerShell 7.6.6 en macOS 26.6.2).** `[System.Management.Automation.Language.Parser]::ParseFile(...)`: 0 errores en los dos. Todas las órdenes que llaman existen (32 y 38). El bloque C# del vigía de `vba-nuevo.ps1` compila con `Add-Type`. Sin sintaxis exclusiva de PowerShell 7. **Límites:** no ejecuta nada (en Mac no hay COM ni Excel de Windows) y el compilador es el de PowerShell 7, no el de Windows PowerShell 5.1 que usará Windows |
 
 ## Qué no funcionó y por qué
 
@@ -148,6 +149,6 @@ Veredictos: **sirve**, **sirve con límite**, **descartada**, **no probada**.
 | `olevba` (oletools 0.60.2) | Sirve con límite | Probada el 14/11. Lee el VBA sin abrir Excel, también fuera del Mac. Solo lee: no mete ni ejecuta código |
 | `xlwings` | No probada | Hay que instalarla. En Mac usa AppleScript por debajo: añade comodidad, no capacidad. Para meter código seguiría necesitando el modelo de objetos de VBA y el ajuste de confianza |
 | Complemento Claude para Excel | No probada | Según la profesora no ve el VBA. Sin comprobar |
-| COM desde PowerShell (`vba.ps1`) o Python (`pywin32`) | No probada | Es la vía de Windows. Escrita, sin ejecutar. Ver [06-windows.md](06-windows.md) |
+| COM desde PowerShell (`vba.ps1`) o Python (`pywin32`) | No probada por nosotros | Es la vía de Windows. `vba.ps1` le funcionó a la profesora (informe de terceros, sin salida). `vba-nuevo.ps1`, sin ejecutar. Ver [06-windows.md](06-windows.md) |
 
 Siguiente: [05-buenas-practicas.md](05-buenas-practicas.md).

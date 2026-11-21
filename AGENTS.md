@@ -53,7 +53,9 @@ solución está aparte, en [demo/solucion/SOLUCION.md](demo/solucion/SOLUCION.md
 ## Estado
 
 - **Mac: probado.** Ciclo completo el 14/11/2026 (macOS 26.6.2, Excel 16.115 en castellano, Python 3.14). Pruebas M1 a M8 en `docs/04-resultados.md`.
-- **Windows: sin probar.** Hay un script (`herramientas/windows/vba.ps1`) y un plan, pero nunca se ha ejecutado.
+- **Windows: sin probar por nosotros.** `herramientas/windows/vba.ps1` le funcionó a la profesora en Windows
+  (informe de terceros del 21/11, sin orden ni salida). `vba-nuevo.ps1` añade `compilar` y un vigía de
+  ventanas: experimental, nunca ejecutado. Detalle y plan de pruebas en `docs/06-windows.md`.
 
 ## Orden de lectura
 

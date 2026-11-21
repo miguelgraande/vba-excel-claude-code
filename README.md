@@ -112,7 +112,9 @@ Por eso el orden es siempre `cargar` → `compilar` → `seguro`.
 ├── herramientas/
 │   ├── vba.py              órdenes de terminal para Mac
 │   ├── requirements-olevba.txt  dependencias congeladas de olevba (opcional)
-│   └── windows/vba.ps1     equivalente para Windows (sin probar)
+│   └── windows/
+│       ├── vba.ps1         equivalente para Windows (le funcionó a la profesora; sin probar por nosotros)
+│       └── vba-nuevo.ps1   vba.ps1 + compilar y vigía de ventanas (experimental, sin ejecutar)
 ├── vba/
 │   ├── Motor.bas           carga, exporta, lista y borra módulos
 │   ├── Cargadora.bas       primera macro, se pega a mano una vez
