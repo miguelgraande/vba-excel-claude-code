@@ -103,8 +103,8 @@ Ese paso no estaba en las ejecuciones de esta tabla; se probó después (ver la 
 
 | ID | Prueba | Resultado |
 |---|---|---|
-| W0 a W8 | Vía COM con `herramientas/windows/vba.ps1` | **Sin probar.** No había un Windows disponible. Plan en [06-windows.md](06-windows.md#11-plan-de-pruebas-en-windows) |
-| Extra | Validar la sintaxis de `vba.ps1` con PowerShell en el Mac | **Pendiente.** Se estaba instalando; a las 01:27 `pwsh` aún no estaba. En Mac no hay COM: solo serviría para comprobar sintaxis |
+| W0 a W10 | Vía COM con `herramientas/windows/vba.ps1` | **Sin probar.** No había un Windows disponible. W9 y W10 (`compilar`) y el nuevo vigía de W6 se añadieron el 21/11, adaptados de MCP-Access ([06-windows.md §13](06-windows.md#13-técnicas-tomadas-de-mcp-access)). Plan en [06-windows.md](06-windows.md#11-plan-de-pruebas-en-windows) |
+| Extra | Validar la sintaxis de `vba.ps1` con PowerShell en el Mac | **Pendiente.** Se estaba instalando; a las 01:27 `pwsh` aún no estaba. El 21/11 tampoco había `pwsh`. En Mac no hay COM: solo serviría para comprobar sintaxis |
 
 ## Qué no funcionó y por qué
 

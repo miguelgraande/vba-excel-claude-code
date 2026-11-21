@@ -2,6 +2,9 @@
 
 Escrito el 14/11/2026 en un Mac, sin Windows a mano. **Nada de esta página está probado en Windows.**
 El script `herramientas/windows/vba.ps1` está escrito pero **sin ejecutar nunca**.
+El 21/11/2026 se le añadieron `compilar` y un vigía que lee las ventanas, adaptados de MCP-Access
+(§13). Tampoco se han ejecutado, y el script no se ha pasado por el analizador de PowerShell (no había
+PowerShell en el Mac).
 
 Cómo leer esta página:
 
@@ -140,6 +143,7 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File herramientas/windows/vba
 | `exportar <libro> <carpeta>` | Saca cada módulo a `.bas`, `.cls` o `.frm` (+ `.frx`). Sobrescribe. Omite hojas sin código. Convierte a UTF-8 para VS Code y git (`-Ansi` lo deja como lo saca Excel) | `& $vba exportar .\prueba.xlsm .\src` |
 | `importar <libro> <archivo>` | Mete el módulo. Si ya hay uno con ese nombre, lo reemplaza. Guarda el libro | `& $vba importar .\prueba.xlsm .\src\Calculo.bas` |
 | `ejecutar <libro> <Macro> [args]` | Ejecuta con `Application.Run` y escribe lo que devuelve. Cierra **sin guardar** | `& $vba ejecutar .\prueba.xlsm Suma 2 3` |
+| `compilar <libro>` | Depurar > Compilar sin ejecutar nada. Responde `OK compila <libro>`, `ERROR COMPILACION: ...` con módulo, línea y columna, o `SIN VERIFICAR: ...`. Cierra **sin guardar**. Solo `OK` cuenta como comprobado (§13) | `& $vba compilar .\prueba.xlsm` |
 
 Opciones:
 
@@ -147,7 +151,7 @@ Opciones:
 |---|---|---|
 | `-Leer "Tests"` o `-Leer "Tests!A1:D20"` | ejecutar | Tras la macro, imprime la hoja (rango usado) o el rango, separado por `;` |
 | `-Guardar` | ejecutar | Guarda el libro al terminar |
-| `-Tiempo 120` | ejecutar | Segundos máximos. Si la macro no vuelve, mata nuestro Excel. `0` = sin límite |
+| `-Tiempo 120` | ejecutar, compilar | Segundos máximos. Si la macro no vuelve, mata nuestro Excel. `0` = sin límite. En `compilar`, máximo 60 |
 | `-Eventos` | todos | Deja activos los eventos (`Workbook_Open`, `Worksheet_Change`...) |
 | `-Visible` | todos | Muestra Excel. Útil para ver qué ventana se ha quedado atascada |
 | `-Ansi` | exportar | No convierte a UTF-8 |
@@ -259,7 +263,8 @@ Lo que **no** se puede **[SUPOSICIÓN]**:
 
 - Quitar por configuración los `MsgBox` o `InputBox` del propio código VBA: `DisplayAlerts` no los toca.
 - Quitar la ventana de "Error en tiempo de ejecución" (Finalizar / Depurar) ni la de error de compilación.
-- Cerrar la ventana desde COM: mientras hay una ventana modal, Excel rechaza las llamadas.
+- Cerrar la ventana desde COM: mientras hay una ventana modal, Excel rechaza las llamadas. Sí se puede
+  por fuera de COM, con la API de ventanas de Windows (Win32): es lo que hace el vigía (§13).
 
 Lo que **sí** se puede:
 
@@ -268,6 +273,8 @@ Lo que **sí** se puede:
 | `On Error GoTo` en cada función de prueba y devolver `"ERROR ..."` | VBA | El error no llega a abrir ventana. Ya probado así en Mac (M4) |
 | Sin `MsgBox` en el código nuevo. En código antiguo, cambiar `MsgBox` por una función `Aviso` que en modo prueba escribe en una hoja | VBA (copia de prueba) | El código de 2015 tendrá muchas |
 | `EnableEvents = $false` y macros apagadas al exportar o importar | script | Evita que `Workbook_Open` abra ventanas al abrir el libro |
+| Vigía de ventanas | script | Cada 0,5 s lee las ventanas de **nuestro** Excel. Aviso simple (solo "Aceptar"): lo pulsa y lo cuenta (`AVISO cerrado con Aceptar: ...`). Otra ventana ("Finalizar"/"Depurar", InputBox, Sí/No): no pulsa nada, la describe (`ERROR VENTANA VBA ...`) y mata nuestro Excel sin esperar al tiempo (§13) |
+| `compilar` antes de `ejecutar` | script | El error de compilación sale sin ninguna macro en marcha, así que cerrar su aviso es seguro |
 | Vigía `-Tiempo` | script | Si `Run` no vuelve en N segundos, mata **solo** nuestro Excel. El script dice "Tiempo agotado, probable ventana modal" y no se queda colgado |
 | `-Visible` | script | Para ver qué ventana es y cerrarla a mano |
 | Control de pantalla (C2) | otra herramienta | Plan B para cerrar la ventana sin matar Excel |
@@ -308,6 +315,7 @@ siempre sobre una copia.
 | Sin el ajuste | "ERROR 1004" devuelto como texto, sin ventana (M4) | Se espera un error COM que el script atrapa y explica **[SUPOSICIÓN]** |
 | Libro abierto | Excel debe tener el libro abierto | El script lo abre y lo cierra cada vez |
 | Ventanas modales | Mismo riesgo | Mismo riesgo, más el vigía que mata solo la instancia propia |
+| Compilar | Menú Depurar > Compilar pulsado con agent-desktop | Botón Compilar (ID 578) pulsado por COM y aviso leído por Win32. Sin agent-desktop |
 
 En Mac la herramienta equivalente es [herramientas/vba.py](../herramientas/vba.py).
 
@@ -367,9 +375,11 @@ Las mismas W0 a W8 del [plan inicial](00-plan-inicial.md), con el script:
 | W3 | `& $vba ejecutar .\prueba.xlsm Suma 2 3` (con una función `Suma` de prueba en el libro) | Devuelve `5` |
 | W4 | `& $vba exportar .\prueba.xlsm .\src` | Archivos en `src`, tildes bien en VS Code |
 | W5 | Editar `src\Nueva.bas`, `importar`, `ejecutar` | Código nuevo entra y corre |
-| W6 | Macro con `MsgBox` y otra con error sin controlar, `-Tiempo 15` | El vigía corta a los 15 s y no queda Excel colgado |
+| W6 | Macro con `MsgBox` y otra con error sin controlar, `-Tiempo 15` | La del `MsgBox` termina con `AVISO cerrado con Aceptar: ...` y su resultado. La del error devuelve `ERROR VENTANA VBA ...` con el texto del error en segundos, sin esperar a los 15 s. No queda Excel colgado |
 | W7 | Ciclo de §6 | Ciclo completo |
 | W8 | Con un Excel propio de la usuaria abierto, repetir W1 a W3 | Su Excel no se toca |
+| W9 | `& $vba compilar .\prueba.xlsm` con un libro que compila | `OK compila prueba.xlsm` |
+| W10 | `compilar` con un libro con una variable sin declarar y `Option Explicit` | `ERROR COMPILACION: ...` con módulo, línea y columna correctos. Repetirlo dos veces seguidas: la segunda no debe decir `SIN VERIFICAR` |
 
 Además, sin ajuste de confianza: `modulos` debe fallar con el diagnóstico del registro y sin ventana.
 
@@ -415,6 +425,8 @@ Otras:
 - [Lista de correo python-win32: DispatchEx abre una instancia nueva de Excel](https://mail.python.org/pipermail/python-win32/2008-February/007014.html)
 - [xlwings: App (instancia propia, display_alerts, kill, macro)](https://docs.xlwings.org/en/stable/api/app.html)
 - [xlwings: Book.macro](https://xlwings.readthedocs.io/en/stable/api/book.html)
+- [MCP-Access, commit 3e0fe05: `mcp_access/compile.py` y `mcp_access/vba_exec.py`](https://github.com/unmateria/MCP-Access) (técnicas de §13)
+- [SendMessageTimeout y WM_GETTEXT: leer el texto de controles de otro proceso](https://learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-getwindowtextw) (GetWindowText no lo hace)
 
 ## Lo aprendido en Mac que conviene llevar a Windows
 
@@ -431,6 +443,47 @@ lo que no está comprobado en Windows es cómo reacciona Excel por COM.
   desde fuera tumbó Excel 3 de 3 veces. En Windows, con una instancia propia, el script puede matar ese
   Excel por tiempo, pero se pierde lo no guardado. Mismo remedio: compilar antes y usar el envoltorio.
 - **Compilar antes de ejecutar.** En Mac se hace con el menú Depurar > Compilar (agent-desktop). En
-  Windows, por COM: `VBE.CommandBars.FindControl(ID:=578).Execute` [SUPOSICIÓN, sin probar].
+  Windows lo hace `vba.ps1 compilar` (§13) [SUPOSICIÓN, sin probar].
 - **Separador decimal.** Con el sistema en castellano, escribir números como texto con punto falló en
   Mac. Pasar los datos como números o por la propiedad `Formula`, que usa notación inglesa.
+
+## 13. Técnicas tomadas de MCP-Access
+
+Añadido el 21/11/2026. [MCP-Access](https://github.com/unmateria/MCP-Access) es un servidor MCP para
+Access en Windows (Python y pywin32, MIT según su `pyproject.toml`), revisado en el commit `3e0fe05` con
+`security-review` (ClawScan y SkillSpector, más revisión manual: sin malware). No se ha copiado su
+código. Se han adaptado a Excel y a PowerShell sus técnicas de `compile.py` y `vba_exec.py`, y en esas
+técnicas tropezó con lo mismo que nosotros en Mac el 14/11.
+**Todo está sin probar en Windows [SUPOSICIÓN]**.
+
+| Técnica | Qué resuelve | Cómo queda en `vba.ps1` |
+|---|---|---|
+| Activar un panel de código del libro antes de compilar (`_ensure_code_pane`) | Compilar actúa sobre el proyecto **activo** del editor, no sobre el pedido. Es nuestro fallo del 14/11 en Mac ([03-solucion-mac.md](03-solucion-mac.md#compilar-vbapy-compilar)) | `CodePane.Show()` y comprobar `VBE.ActiveVBProject.FileName`. Si no es el libro: `SIN VERIFICAR`, no compila |
+| Marcar el proyecto como cambiado antes de compilar (insertar y borrar una línea) | Si Excel da el proyecto por compilado, el menú Compilar sale desactivado (visto en Mac una vez de tres) | `InsertLines` y `DeleteLines` en memoria. El libro se abre en solo lectura y no se guarda |
+| Pulsar Compilar por el menú del editor | Compila todos los módulos | `VBE.CommandBars.FindControl(1, 578).Execute()`. El ID no depende del idioma |
+| Vigía que lee el texto **antes** de cerrar (`_compile_dialog_watchdog`) | Saber qué decía el error, no solo que lo hubo | Trabajo aparte con Win32: busca ventanas `#32770` del PID propio y lee su texto con `WM_GETTEXT` |
+| Lugar del error (`ActiveCodePane.GetSelection`) | Módulo, línea y columna | `ERROR COMPILACION: ... - Modulo, Lin 9, Col 20 : linea` |
+| Distinguir "no se pudo pulsar Compilar" de "el código no compila" | Evitar culpar al código de un fallo de la herramienta | `SIN VERIFICAR: no se pudo pulsar Compilar (...)` |
+| Comprobación final propia (no de MCP-Access) | Excel no tiene `IsCompiled` como Access | `OK` solo si no hubo aviso y el botón Compilar queda desactivado tras pulsarlo |
+
+Lo que **no** se ha tomado:
+
+- **Pulsar "Finalizar" o "Cancelar" en un error en tiempo de ejecución.** MCP-Access lo hace. En Mac,
+  detener una macro parada cerró Excel 3 de 3 veces (regla de oro 1). El vigía no pulsa nada en esas
+  ventanas: las describe y mata solo nuestro Excel, que es propio e invisible.
+- **Descompilar y compactar**, `RunCommand` y `taskkill` de `msaccess.exe`: son de Access.
+- **Python y pywin32**: `vba.ps1` sigue sin dependencias.
+
+Diferencia con Mac: el vigía de Mac solo cierra avisos titulados "Microsoft Excel", porque allí la
+instancia de Excel es compartida. En Windows filtra por el PID de nuestro Excel, así que cierra
+cualquier aviso con un solo botón "Aceptar" de esa instancia.
+
+Suposiciones que hay que comprobar (W6, W9, W10):
+
+- Que el `MsgBox` y la ventana de error de VBA son de clase `#32770` y visibles aunque Excel esté invisible.
+  Si no lo fueran, queda el límite `-Tiempo` de antes.
+- Que `VBE.MainWindow.Visible` y `CodePane.Show()` funcionan con Excel invisible.
+- Que `Execute()` no se bloquea para siempre mientras el aviso está abierto (el vigía lo cierra).
+- Que el botón Compilar se desactiva tras compilar bien. Si no, la orden dirá `SIN VERIFICAR`, nunca un
+  `OK` falso.
+- Que `compilar` funciona con las macros activadas (`AutomationSecurity` Low) y los eventos apagados.

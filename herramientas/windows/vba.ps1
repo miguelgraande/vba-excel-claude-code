@@ -1,5 +1,5 @@
 # =====================================================================
-# SIN PROBAR: escrito el 14/11/2026 en un Mac; probar en Windows antes de usar.
+# SIN PROBAR: escrito el 14/11/2026 en un Mac (compilar y vigia: 21/11); probar en Windows antes de usar.
 # =====================================================================
 #
 # vba.ps1: puente terminal <-> VBA de Excel en Windows, por COM.
@@ -12,12 +12,20 @@
 #   exportar <libro> <carpeta>             saca cada modulo a .bas/.cls/.frm (UTF-8)
 #   importar <libro> <archivo.bas|.cls>    mete el modulo; reemplaza el del mismo nombre y guarda
 #   ejecutar <libro> <Macro> [args...]     ejecuta y escribe en pantalla lo que devuelve
+#   compilar <libro>                       Depurar > Compilar sin ejecutar nada: OK compila / ERROR COMPILACION
 #
 # Opciones:
 #   -Leer "Hoja" o "Hoja!A1:C20"   (ejecutar) tras la macro, imprime ese rango separado por ;
 #   -Guardar                       (ejecutar) guarda el libro al terminar (por defecto NO guarda)
-#   -Tiempo 120                    (ejecutar) segundos maximos; despues mata SOLO nuestro Excel.
+#   -Tiempo 120                    (ejecutar, compilar) segundos maximos; despues mata SOLO nuestro Excel.
 #                                  0 = sin limite
+#
+# Vigia de ventanas (ejecutar y compilar): mira cada 0,5 s las ventanas de NUESTRO Excel y lee su texto.
+#   - Aviso simple (un solo boton Aceptar/OK): pulsa Aceptar y lo cuenta (AVISO cerrado con Aceptar).
+#   - En compilar, el aviso de error de compilacion: lo lee y pulsa Aceptar.
+#   - Cualquier otra (Finalizar/Depurar, InputBox, Si/No): NO pulsa nada, la describe y mata nuestro Excel.
+# Tecnica adaptada de MCP-Access (github.com/unmateria/MCP-Access, commit 3e0fe05, MIT):
+# compile.py (_ensure_code_pane, _compile_dialog_watchdog) y vba_exec.py (_find_dialog_hwnds_by_pid).
 #   -Eventos                       activa eventos (Workbook_Open, etc.). Por defecto apagados
 #   -Visible                       muestra la ventana de Excel (para ver una ventana atascada)
 #   -Ansi                          (exportar) deja los archivos en ANSI, como los saca Excel
@@ -73,8 +81,124 @@ Uso:
   vba.ps1 exportar <libro> <carpeta> [-Ansi]
   vba.ps1 importar <libro> <archivo.bas|.cls|.frm>
   vba.ps1 ejecutar <libro> <Macro> [args...] [-Leer "Hoja!A1:C20"] [-Guardar] [-Tiempo 120]
+  vba.ps1 compilar <libro> [-Tiempo 60]
 Opciones comunes: -Visible -Eventos
 '@
+}
+
+# ---------------------------------------------------------------------
+# Vigia de ventanas (Win32). Corre en un trabajo aparte porque Run y Execute
+# no vuelven mientras haya una ventana modal abierta.
+# ---------------------------------------------------------------------
+$CODIGO_VENTANAS = @'
+using System;
+using System.Collections.Generic;
+using System.Runtime.InteropServices;
+using System.Text;
+public static class VentanasVba {
+    delegate bool Recorrer(IntPtr h, IntPtr l);
+    [DllImport("user32.dll")] static extern bool EnumWindows(Recorrer f, IntPtr l);
+    [DllImport("user32.dll")] static extern bool EnumChildWindows(IntPtr padre, Recorrer f, IntPtr l);
+    [DllImport("user32.dll")] static extern uint GetWindowThreadProcessId(IntPtr h, out uint pid);
+    [DllImport("user32.dll")] static extern bool IsWindowVisible(IntPtr h);
+    [DllImport("user32.dll", CharSet = CharSet.Unicode)] static extern int GetClassName(IntPtr h, StringBuilder s, int n);
+    [DllImport("user32.dll", CharSet = CharSet.Unicode)]
+    static extern IntPtr SendMessageTimeout(IntPtr h, uint m, IntPtr w, StringBuilder l, uint f, uint t, out IntPtr r);
+    [DllImport("user32.dll")]
+    static extern IntPtr SendMessageTimeout(IntPtr h, uint m, IntPtr w, IntPtr l, uint f, uint t, out IntPtr r);
+    [DllImport("user32.dll")] static extern bool PostMessage(IntPtr h, uint m, IntPtr w, IntPtr l);
+    static string Clase(IntPtr h) { var s = new StringBuilder(256); GetClassName(h, s, 256); return s.ToString(); }
+    // WM_GETTEXT con tiempo maximo: GetWindowText no lee controles de otro proceso
+    public static string Texto(IntPtr h) {
+        IntPtr n;
+        if (SendMessageTimeout(h, 0x000E, IntPtr.Zero, IntPtr.Zero, 2, 1000, out n) == IntPtr.Zero) return "";
+        var s = new StringBuilder(n.ToInt32() + 1);
+        IntPtr r;
+        SendMessageTimeout(h, 0x000D, (IntPtr)s.Capacity, s, 2, 1000, out r);
+        return s.ToString();
+    }
+    // Ventanas modales (clase #32770) visibles del proceso pid
+    public static IntPtr[] Dialogos(int pid) {
+        var lista = new List<IntPtr>();
+        EnumWindows((h, l) => {
+            uint p; GetWindowThreadProcessId(h, out p);
+            if (p == (uint)pid && IsWindowVisible(h) && Clase(h) == "#32770") lista.Add(h);
+            return true;
+        }, IntPtr.Zero);
+        return lista.ToArray();
+    }
+    public static IntPtr[] Hijos(IntPtr padre, string clase) {
+        var lista = new List<IntPtr>();
+        EnumChildWindows(padre, (h, l) => { if (Clase(h) == clase) lista.Add(h); return true; }, IntPtr.Zero);
+        return lista.ToArray();
+    }
+    public static void Pulsar(IntPtr boton) { PostMessage(boton, 0x00F5, IntPtr.Zero, IntPtr.Zero); } // BM_CLICK
+}
+'@
+
+# Devuelve lineas TIPO<tab>TITULO<tab>TEXTO<tab>BOTONES, con TIPO = AVISO (cerrado con Aceptar),
+# VENTANA (no se toca; mata nuestro Excel) o AGOTADO (tiempo; mata nuestro Excel).
+$VIGIA = {
+    param([int] $id, [int] $seg, [string] $codigo, [string] $modo)
+    Add-Type -TypeDefinition $codigo
+    $fin = if ($seg -gt 0) { (Get-Date).AddSeconds($seg) } else { [datetime]::MaxValue }
+    $vistas = @{}
+    while ((Get-Date) -lt $fin) {
+        if (-not (Get-Process -Id $id -ErrorAction SilentlyContinue)) { return }
+        foreach ($d in [VentanasVba]::Dialogos($id)) {
+            if ($vistas.ContainsKey([string] $d)) { continue }
+            $vistas[[string] $d] = $true
+            $titulo = [VentanasVba]::Texto($d)
+            $texto = @([VentanasVba]::Hijos($d, 'Static') | ForEach-Object { [VentanasVba]::Texto($_).Trim() } | Where-Object { $_ }) -join ' / '
+            $botones = @([VentanasVba]::Hijos($d, 'Button') | ForEach-Object { @{ h = $_; t = [VentanasVba]::Texto($_).Replace('&', '').Trim() } } | Where-Object { $_.t })
+            $aceptar = @($botones | Where-Object { $_.t -in @('Aceptar', 'OK') })
+            $conEdicion = @([VentanasVba]::Hijos($d, 'Edit')).Count -gt 0
+            $linea = "$titulo`t$texto`t" + (@($botones | ForEach-Object { $_.t }) -join ', ')
+            # Aviso simple: un solo boton Aceptar. En compilar vale tambien Aceptar + Ayuda (error de compilacion)
+            $cerrable = $aceptar.Count -eq 1 -and -not $conEdicion -and ($modo -eq 'compilar' -or $botones.Count -eq 1)
+            if ($cerrable) {
+                [VentanasVba]::Pulsar($aceptar[0].h)
+                "AVISO`t$linea"
+            } else {
+                "VENTANA`t$linea"
+                Stop-Process -Id $id -Force -ErrorAction SilentlyContinue
+                return
+            }
+        }
+        Start-Sleep -Milliseconds 500
+    }
+    Stop-Process -Id $id -Force -ErrorAction SilentlyContinue
+    'AGOTADO'
+}
+
+function Iniciar-Vigia([int] $id, [int] $seg, [string] $modo) {
+    return Start-Job -ScriptBlock $VIGIA -ArgumentList $id, $seg, $CODIGO_VENTANAS, $modo
+}
+
+# Para el vigia y devuelve sus lineas ya separadas: @{ Tipo; Titulo; Texto; Botones }
+function Parar-Vigia($vigia, [int] $esperar = 0) {
+    if (-not $vigia) { return @() }
+    if ($esperar -gt 0) { $null = Wait-Job $vigia -Timeout $esperar }
+    Stop-Job $vigia -ErrorAction SilentlyContinue
+    $lineas = @(Receive-Job $vigia -ErrorAction SilentlyContinue)
+    Remove-Job $vigia -Force -ErrorAction SilentlyContinue
+    return @($lineas | ForEach-Object {
+        $p = (([string] $_) + "`t`t`t") -split "`t"
+        @{ Tipo = $p[0]; Titulo = $p[1]; Texto = $p[2]; Botones = $p[3] }
+    })
+}
+
+function Describir-Ventana($v) { return "$($v.Titulo) / $($v.Texto) [botones: $($v.Botones)]" }
+
+# Tras un error de compilacion el editor deja el cursor en la linea del fallo (ActiveCodePane)
+function Lugar-Error($excel) {
+    try {
+        $panel = $excel.VBE.ActiveCodePane
+        $l1 = 0; $c1 = 0; $l2 = 0; $c2 = 0
+        $panel.GetSelection([ref] $l1, [ref] $c1, [ref] $l2, [ref] $c2)
+        $modulo = $panel.CodeModule
+        return " - $($modulo.Parent.Name), Lin $l1, Col $c1 : $($modulo.Lines($l1, 1).Trim())"
+    } catch { return '' }
 }
 
 function Salir-Con([int] $codigo, [string] $mensaje) {
@@ -197,7 +321,7 @@ function Quitar-Cabecera([string[]] $lineas) {
 # Comprobaciones previas (no abren Excel)
 # ---------------------------------------------------------------------
 if (-not $Comando -or $Comando -in @('-h', '--help', 'ayuda', 'help')) { Mostrar-Uso; exit 1 }
-if ($Comando -notin @('modulos', 'exportar', 'importar', 'ejecutar')) { Mostrar-Uso; Salir-Con 1 "Comando desconocido: $Comando" }
+if ($Comando -notin @('modulos', 'exportar', 'importar', 'ejecutar', 'compilar')) { Mostrar-Uso; Salir-Con 1 "Comando desconocido: $Comando" }
 if (-not $Libro) { Mostrar-Uso; Salir-Con 1 'Falta el libro.' }
 if (-not $Resto) { $Resto = @() }
 
@@ -245,12 +369,13 @@ try {
     $excel.EnableEvents = [bool] $Eventos
     $excel.ScreenUpdating = [bool] $Visible
 
-    # Macros apagadas salvo para ejecutar: asi exportar/modulos/importar no disparan codigo al abrir
-    if ($Comando -eq 'ejecutar') { $excel.AutomationSecurity = $MSO_SEGURIDAD_BAJA }
+    # Macros apagadas salvo para ejecutar y compilar: asi exportar/modulos/importar no disparan codigo al abrir.
+    # compilar las deja activas por si con el proyecto desactivado el editor no compila (sin comprobar).
+    if ($Comando -in @('ejecutar', 'compilar')) { $excel.AutomationSecurity = $MSO_SEGURIDAD_BAJA }
     else { $excel.AutomationSecurity = $MSO_SEGURIDAD_DESACTIVADA }
 
-    # Open(FileName, UpdateLinks=0, ReadOnly)
-    $soloLectura = ($Comando -in @('modulos', 'exportar'))
+    # Open(FileName, UpdateLinks=0, ReadOnly). compilar toca el codigo solo en memoria y no guarda
+    $soloLectura = ($Comando -in @('modulos', 'exportar', 'compilar'))
     $wb = $excel.Workbooks.Open($rutaLibro, 0, $soloLectura)
 
     if (($Comando -eq 'importar' -or $Guardar) -and $wb.ReadOnly) {
@@ -363,15 +488,8 @@ try {
             # Nombre completo: 'Libro.xlsm'!Modulo.Macro (evita ejecutar una macro de otro libro)
             if ($macro -notmatch '!') { $macro = "'" + $wb.Name.Replace("'", "''") + "'!" + $macro }
 
-            # Vigia: si la macro no vuelve a tiempo (ventana modal, bucle), mata NUESTRO Excel
-            if ($Tiempo -gt 0 -and $pidExcel) {
-                $vigia = Start-Job -ArgumentList $pidExcel, $Tiempo -ScriptBlock {
-                    param($id, $seg)
-                    Start-Sleep -Seconds $seg
-                    Stop-Process -Id $id -Force -ErrorAction SilentlyContinue
-                    'AGOTADO'
-                }
-            }
+            # Vigia: cierra avisos simples con Aceptar; ante otra ventana o sin respuesta a tiempo, mata NUESTRO Excel
+            if ($pidExcel) { $vigia = Iniciar-Vigia $pidExcel $Tiempo 'ejecutar' }
 
             $resultado = $null
             try {
@@ -380,12 +498,14 @@ try {
                 [object[]] $parametros = @($macro) + $argumentos
                 $resultado = $excel.Run.Invoke($parametros)
             } catch {
-                $agotado = $false
-                if ($vigia) {
-                    $null = Wait-Job $vigia -Timeout 5
-                    $agotado = (@(Receive-Job $vigia -ErrorAction SilentlyContinue) -contains 'AGOTADO')
+                $vistas = Parar-Vigia $vigia 5; $vigia = $null
+                $ventana = @($vistas | Where-Object { $_.Tipo -eq 'VENTANA' })
+                if ($ventana.Count -gt 0) {
+                    $excel = $null; $wb = $null
+                    throw ("ERROR VENTANA VBA (no se ha pulsado nada): $(Describir-Ventana $ventana[0]). " +
+                        'Excel propio cerrado a la fuerza; se pierde lo no guardado. Compila antes y usa SinVentanas.')
                 }
-                if ($agotado) {
+                if (@($vistas | Where-Object { $_.Tipo -eq 'AGOTADO' }).Count -gt 0) {
                     $excel = $null; $wb = $null
                     throw "Tiempo agotado ($Tiempo s). Probable ventana modal (MsgBox, InputBox o error sin controlar). Excel propio cerrado a la fuerza."
                 }
@@ -393,7 +513,10 @@ try {
                 if ($_.Exception.InnerException) { $msg = $_.Exception.InnerException.Message }
                 throw "Fallo al ejecutar $macro : $msg"
             }
-            if ($vigia) { Stop-Job $vigia -ErrorAction SilentlyContinue }
+            $vistas = Parar-Vigia $vigia; $vigia = $null
+            foreach ($v in @($vistas | Where-Object { $_.Tipo -eq 'AVISO' })) {
+                [Console]::Error.WriteLine("AVISO cerrado con Aceptar: $(Describir-Ventana $v) (usa SinVentanas para evitarlo)")
+            }
 
             Escribir-Valor $resultado
 
@@ -406,6 +529,79 @@ try {
                 Escribir-Valor $r.Value2
             }
             if ($Guardar) { $guardarAlFinal = $true }
+        }
+
+        'compilar' {
+            # Mismo formato de salida que vba.py compilar en Mac. Solo OK vale como comprobado.
+            $proyecto = Obtener-Proyecto $wb
+            $nombreLibro = $wb.Name
+            if (-not $pidExcel) { Write-Output 'SIN VERIFICAR: sin PID de Excel propio no hay vigia; no compilo'; $codigoSalida = 2; break }
+
+            # 1. Un componente con codigo, primero modulos normales
+            $comp = $null
+            foreach ($soloModulos in @($true, $false)) {
+                foreach ($c in $proyecto.VBComponents) {
+                    if ($soloModulos -and [int] $c.Type -ne 1) { continue }
+                    if ($c.CodeModule.CountOfLines -gt 0) { $comp = $c; break }
+                }
+                if ($comp) { break }
+            }
+            if (-not $comp) { Write-Output "SIN VERIFICAR: $nombreLibro no tiene codigo que compilar"; $codigoSalida = 2; break }
+
+            # 2. Marcar el proyecto como cambiado (solo en memoria): si Excel lo da por compilado, Compilar sale desactivado
+            $cm = $comp.CodeModule
+            $cm.InsertLines($cm.CountOfLines + 1, "' marca temporal de vba.ps1 compilar")
+            $cm.DeleteLines($cm.CountOfLines, 1)
+
+            # 3. Compilar actua sobre el proyecto ACTIVO del editor: se activa un panel de ESTE libro y se comprueba
+            $excel.VBE.MainWindow.Visible = $true
+            $cm.CodePane.Show()
+            $activo = $null
+            try { $activo = $excel.VBE.ActiveVBProject.FileName } catch { }
+            if (-not $activo -or [System.IO.Path]::GetFullPath($activo) -ne [System.IO.Path]::GetFullPath($rutaLibro)) {
+                Write-Output "SIN VERIFICAR: el editor tiene activo el proyecto de '$activo', no el de $nombreLibro; no compilo"
+                $codigoSalida = 2; break
+            }
+
+            # 4. Boton Compilar por su ID (578), que no depende del idioma de Excel
+            $boton = $null
+            try { $boton = $excel.VBE.CommandBars.FindControl(1, 578) } catch { }
+            if ($null -eq $boton) { Write-Output 'SIN VERIFICAR: no encuentro el boton Compilar (ID 578) en el editor'; $codigoSalida = 2; break }
+            if (-not $boton.Enabled) {
+                Write-Output 'SIN VERIFICAR: el boton Compilar esta desactivado (Excel lo da por compilado); no garantiza que compile'
+                $codigoSalida = 2; break
+            }
+
+            # 5. Pulsar con el vigia en marcha: lee el aviso de error y pulsa Aceptar
+            $limite = if ($Tiempo -gt 0) { [Math]::Min($Tiempo, 60) } else { 60 }
+            $vigia = Iniciar-Vigia $pidExcel $limite 'compilar'
+            Start-Sleep -Seconds 3   # que el vigia este listo antes de que salga un aviso
+            $falloBoton = $null
+            try { $boton.Execute() } catch { $falloBoton = $_.Exception.Message }
+            Start-Sleep -Seconds 2   # avisos que salen tarde
+            $vistas = Parar-Vigia $vigia; $vigia = $null
+
+            $ventana = @($vistas | Where-Object { $_.Tipo -in @('VENTANA', 'AGOTADO') })
+            if ($ventana.Count -gt 0) {
+                $excel = $null; $wb = $null
+                if ($ventana[0].Tipo -eq 'AGOTADO') { throw "Tiempo agotado ($limite s) al compilar. Excel propio cerrado a la fuerza." }
+                throw "ERROR VENTANA VBA (no se ha pulsado nada): $(Describir-Ventana $ventana[0]). Excel propio cerrado a la fuerza."
+            }
+            $avisos = @($vistas | Where-Object { $_.Tipo -eq 'AVISO' })
+            if ($avisos.Count -gt 0) {
+                # El ultimo aviso es el del error; los anteriores suelen ser otros
+                $a = $avisos[$avisos.Count - 1]
+                Write-Output "ERROR COMPILACION: $($a.Titulo) / $($a.Texto) en $nombreLibro$(Lugar-Error $excel)"
+                $codigoSalida = 2
+            } elseif ($falloBoton) {
+                Write-Output "SIN VERIFICAR: no se pudo pulsar Compilar ($falloBoton). Eso no quiere decir que el codigo tenga errores"
+                $codigoSalida = 2
+            } elseif ($boton.Enabled) {
+                Write-Output 'SIN VERIFICAR: Compilar sigue activo tras pulsarlo; no se sabe si ha compilado'
+                $codigoSalida = 2
+            } else {
+                Write-Output "OK compila $nombreLibro"
+            }
         }
     }
 
@@ -424,7 +620,7 @@ finally {
     foreach ($o in @($wb, $excel)) {
         if ($null -ne $o) { try { $null = [System.Runtime.InteropServices.Marshal]::ReleaseComObject($o) } catch { } }
     }
-    $wb = $null; $excel = $null; $proyecto = $null; $comp = $null; $existente = $null; $nuevo = $null; $cm = $null; $ws = $null; $r = $null
+    $wb = $null; $excel = $null; $proyecto = $null; $comp = $null; $existente = $null; $nuevo = $null; $cm = $null; $ws = $null; $r = $null; $boton = $null; $c = $null
     [System.GC]::Collect(); [System.GC]::WaitForPendingFinalizers()
     [System.GC]::Collect(); [System.GC]::WaitForPendingFinalizers()
     # 4. Vigia fuera
